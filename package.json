@@ -1,0 +1,25 @@
+{
+	"name": "py2hex",
+	"version": "0.0.2",
+	"description": "Convert python file to hex (for micro:bit)",
+	"main": "index.js",
+	"scripts": {
+		"start": "node index.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/stevenjoezhang/py2hex"
+	},
+	"keywords": [
+		"python",
+		"micro:bit",
+		"hex"
+	],
+	"bin": {
+		"p2h": "./bin/p2h"
+	},
+	"author": "Mimi <zsq@zsq.im> https://zhangshuqiao.org",
+	"license": "GPL-3.0-or-later",
+	"dependencies": {
+	}
+}
