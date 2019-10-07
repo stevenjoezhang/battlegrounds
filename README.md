@@ -1,9 +1,9 @@
 # Py2Hex
 
-[![Npm Version](https://img.shields.io/npm/v/py2hex.svg)](https://npmjs.org/package/py2hex)
-[![Npm Downloads Month](https://img.shields.io/npm/dm/py2hex.svg)](https://npmjs.org/package/py2hex)
-[![Npm Downloads Total](https://img.shields.io/npm/dt/py2hex.svg)](https://npmjs.org/package/py2hex)
-[![License](https://img.shields.io/npm/l/py2hex.svg)](https://npmjs.org/package/py2hex)
+[![Npm Version](https://img.shields.io/npm/v/py2hex?style=flat-square)](https://npmjs.org/package/py2hex)
+[![Npm Downloads Month](https://img.shields.io/npm/dm/py2hex?style=flat-square)](https://npmjs.org/package/py2hex)
+[![Npm Downloads Total](https://img.shields.io/npm/dt/py2hex?style=flat-square)](https://npmjs.org/package/py2hex)
+[![License](https://img.shields.io/npm/l/py2hex?style=flat-square)](https://npmjs.org/package/py2hex)
 
 ## Install
 
