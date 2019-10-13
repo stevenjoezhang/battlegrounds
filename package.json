@@ -18,8 +18,10 @@
 	"bin": {
 		"p2h": "./bin/p2h"
 	},
-	"author": "Mimi <zsq@zsq.im> https://zhangshuqiao.org",
+	"author": "Mimi <stevenjoezhang@gmail.com> https://zhangshuqiao.org",
 	"license": "GPL-3.0-or-later",
-	"dependencies": {
-	}
+	"bugs": {
+		"url": "https://github.com/stevenjoezhang/py2hex/issues"
+	},
+	"homepage": "https://github.com/stevenjoezhang/py2hex#readme"
 }
