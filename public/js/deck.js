@@ -78,6 +78,16 @@ document.querySelectorAll(".minion").forEach(ele => {
 	//ele,
 });
 
+function makeid(length) {
+	var result = '';
+	var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	var charactersLength = characters.length;
+	for (var i = 0; i < length; i++) {
+		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+	}
+	return result;
+}
+
 function Minion(prop) {
 	this.ele = document.createElement("div");
 	this.ele.setAttribute("gid", prop.gid);
@@ -154,7 +164,9 @@ function Minion(prop) {
 		//deltaY > 0 ? deltaY -= this.ele.offsetHeight / 3 : deltaY += this.ele.offsetHeight / 3;
 		document.querySelectorAll(".minions")[this.belongsTo].style.cssText = "z-index: 100;";
 		document.querySelectorAll(".minions")[1 - this.belongsTo].style.cssText = "z-index: 0;";
-		document.getElementById("attack-style").innerHTML = `@keyframes attacking {
+		console.log("STYLE", new Date().getSeconds(), new Date().getMilliseconds())
+		let rid = makeid(8);
+		document.getElementById("attack-style").innerHTML += `@keyframes attacking-${rid} {
 				0% {
 					transform: translate3d(0, 0, 0);
 				}
@@ -174,19 +186,25 @@ function Minion(prop) {
 					transform: translate3d(0, 0, 0);
 				}
 			}
-			.attacking {
-				animation: attacking 1s;
+			.attacking-${rid} {
+				animation: attacking-${rid} 1s;
 				z-index: 100;
 			}
 			`;
-		this.ele.classList.add("attacking");
+		setTimeout(() => {
+			this.ele.classList.add(`attacking-${rid}`);
+			console.log("ATK", new Date().getSeconds(), new Date().getMilliseconds())
+		}, 0);
 		return new Promise(resolve => {
 			setTimeout(() => {
 				document.querySelector(".section-decklist").classList.add(this.belongsTo === 0 ? "shake-down" : "shake-up");
 				resolve();
 				setTimeout(() => {
 					document.querySelector(".section-decklist").classList.remove(this.belongsTo === 0 ? "shake-down" : "shake-up");
-					this.ele.classList.remove("attacking");
+					setTimeout(() => {
+						this.ele.classList.remove(`attacking-${rid}`);
+						console.log("STOP", new Date().getSeconds(), new Date().getMilliseconds())
+					}, 0);
 				}, 500);
 			}, 500);
 		});
@@ -235,7 +253,7 @@ var queue = [
 (async () => {
 	await initBoard();
 	//var queue = [];
-
+	document.getElementById("console").innerText = battle[2];
 	for (let i in battle[1]) {
 		i = Number(i);
 		let attacking = battle[1][i];

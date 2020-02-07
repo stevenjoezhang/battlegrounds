@@ -11,7 +11,9 @@ class mimibattlefeild(battlefeild):
         super(mimibattlefeild, self).__init__(*args, **kwargs)
         self.history = []
         self.atkHistory = []
+        self.log = ""
     def dump(self):
+        self.log += self.__str__() + "\n";
         #print (self,"\n")
         #print(self.history)
         current = {
@@ -64,7 +66,7 @@ def run(queue):
     ba.add_minion(f,"down",0)
     ba.add_minion(g,"down",0)
     battle(ba)
-    queue.put([ba.history,ba.atkHistory])
+    queue.put([ba.history,ba.atkHistory,ba.log])
 
 @app.route('/')
 def root():
@@ -76,7 +78,7 @@ def data():
     spawn = Process(target = run, args = (q,))
     spawn.start()
     t = q.get()
-    print(len(t[0]), len(t[1]))
+    #print(len(t[0]), len(t[1]))
     spawn.join()
     return jsonify(t)
 
