@@ -1,8 +1,11 @@
 import random
 ch_list=("beast","murloc","mech","demon","all")
-special_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye","zapp_slywick","foe_reaper_4000","cave_hydra","the_boogeymonster")
+special_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye","zapp_slywick","foe_reaper_4000","cave_hydra","ironhide_direhorn","the_boogeymonster","festeroot_hulk","scavenging_hyena","junkbot", "soul_juggler")
 #m_b_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye")
 #d_s_list=("Mecharoo","")
+
+##"ironhide_direhorn" no summon,"soul_juggler",
+
 class minion:
     def __init__(self,na="",at=0,he=0,ch="",t=False,sh=False,p=False,w=1,d=0,m=0,dea=False,g=False,spe=""):
         self.name= na
@@ -102,7 +105,7 @@ class minion:
         else:
             print ("error: wrong poison set")
 
-    def get_poison(self):
+    def get_posion(self):
         return self.poison
 
     def set_wind(self,w):
@@ -336,8 +339,9 @@ def usual_minion_battle(minion1,minion2): #minion1是攻击方
     minion1.minion_attack(minion2)
     minion2.minion_attack(minion1)
     minion1.set_move(2)
-    print("ATTACK {} {}".format(id(minion1), id(minion2)))
 def single_minion_battle(m,m_lst):
+    be_attack=[]
+    aim=-2
     if m.get_special() == "zapp_slywick":
         if m.get_golden():
             m.set_wind(4)
@@ -357,6 +361,7 @@ def single_minion_battle(m,m_lst):
                 if temp[i] == min1:
                     temp1.append(avail[i])  #记录所有最低攻对应的序号
             aim = random.choice(temp1)
+            be_attack.append(aim)
             usual_minion_battle(m,m_lst[aim])
     elif m.get_special() == ("foe_reaper_4000" or "cave_hydra"):
         aim =select_minion(m_lst)
@@ -365,24 +370,33 @@ def single_minion_battle(m,m_lst):
             if minionlist == 1:
                 m.minion_attack(m_lst[aim])
                 m_lst[aim].minion_attack(m)
+                be_attack.append( aim)
             elif aim == 0:
                 m.minion_attack(m_lst[aim])
                 m_lst[aim].minion_attack(m)
                 m_lst[aim + 1].minion_attack(m)
+                be_attack.append(aim)
+                be_attack.append(aim+1)
             elif aim == minionlist - 1:
                 m.minion_attack(m_lst[aim])
                 m_lst[aim].minion_attack(m)
                 m_lst[aim - 1].minion_attack(m)
+                be_attack.append(aim)
+                be_attack.append(aim-1)
             else:
                 m.minion_attack(m_lst[aim])
                 m_lst[aim].minion_attack(m)
                 m_lst[aim + 1].minion_attack(m)
                 m_lst[aim - 1].minion_attack(m)
+                be_attack.append(aim)
+                be_attack.append(aim-1)
+                be_attack.append(aim+1)
             m.set_move(2)
     elif m.get_special() == "the_boogeymonster":
         aim = select_minion(m_lst)
         if aim!=-1:
             usual_minion_battle(m, m_lst[aim])
+            be_attack.append(aim)
             if m_lst[aim].get_damage() >= (m_lst[aim].get_health() + m_lst[aim].get_buff_health()):
                 if m.get_golden():
                     m.set_health(4)
@@ -394,13 +408,41 @@ def single_minion_battle(m,m_lst):
         aim = select_minion(m_lst)
         if aim!=-1:
             usual_minion_battle(m, m_lst[aim])
+            be_attack.append(aim)
             if m_lst[aim].get_damage() > (m_lst[aim].get_health() + m_lst[aim].get_buff_health()):
                 pass #还没有写summon函数
     else:
         aim = select_minion(m_lst)
         if aim!=-1:
             usual_minion_battle(m, m_lst[aim])
+            be_attack.append(aim)
+    return [be_attack,aim]
 
+def after_attack(lst):
+    for i in lst:
+        if i.get_special() == "festeroot_hulk":
+            if i.get_golden():
+                i.set_attack(2)
+            else:
+                i.set_attack(1)
+def after_death(lst,dea):#dea为二维list，dea[0]=beast,dea[1]=mech
+    for i in lst:
+        if i.get_special() == "scavenging_hyena":
+            if i.get_golden():
+                i.set_health(2*dea[0])
+                i.set_attack(4*dea[0])
+            else:
+                i.set_health(dea[0])
+                i.set_attack(2*dea[0])
+        elif i.get_special() == "junkbot":
+            if i.get_golden():
+                i.set_health(4*dea[1])
+                i.set_attack(4*dea[1])
+            else:
+                i.set_health(2*dea[1])
+                i.set_attack(2*dea[1])
+        else:
+            pass
 class battlefeild:
     def __init__(self, up=[], down=[],upa=[],downa=[]):
         self.up = up #记录上方
@@ -494,25 +536,31 @@ class battlefeild:
     def minion_battle(self):
         side = self.now[1]
         pos=self.now[0]
+        attack_state=[pos]
         if  str(side) !="True" and str(side) !="False":
             print ("error: which side to attack")
         elif side:
             i=0
             while i<self.up[pos].get_wind():
-                single_minion_battle(self.up[pos],self.down)
+                temp=single_minion_battle(self.up[pos],self.down)
+                attack_state.append(temp[1])
                 self.detect_death()
                 if self.up[pos].get_death():#检测自己死没死
                     break
+                after_attack(self.up)
                 i+=1
 
         else:
             i=0
             while i<self.down[pos].get_wind():
-                single_minion_battle(self.down[pos], self.up)
+                temp=single_minion_battle(self.down[pos], self.up)
+                attack_state.append(temp[1])
                 self.detect_death()
                 if self.down[pos].get_death():#检测自己死没死
                     break
+                after_attack(self.down)
                 i+=1
+        return attack_state
 
 
     def detect_death(self):
@@ -619,7 +667,8 @@ def battle(field):
     field.battle_begin()
     print (field,"\n")
     while field.up_minion()>0 and field.down_minion()>0:
-        field.minion_battle()
+        attack_list=field.minion_battle()
+        print (attack_list)
         #field.detect_death()
         field.remove_death()
         field.renew_attack()
@@ -647,8 +696,8 @@ if __name__=="__main__":
     ba.add_minion(g,"down",0)
     battle(ba)
 
-    '''
-    lst=[0,2,3]
-    lst.insert(6,'x')
-    print (lst,len(lst))
-    '''
+'''
+lst=[0,2,3]
+lst.insert(6,'x')
+print (lst,len(lst))
+'''
