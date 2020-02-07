@@ -416,7 +416,7 @@ def single_minion_battle(m,m_lst):
         if aim!=-1:
             usual_minion_battle(m, m_lst[aim])
             be_attack.append(aim)
-    return [be_attack,aim]
+    return [be_attack,id(m_lst[aim])]
 
 def after_attack(lst):
     for i in lst:
@@ -536,11 +536,12 @@ class battlefeild:
     def minion_battle(self):
         side = self.now[1]
         pos=self.now[0]
-        attack_state=[pos]
+        attack_state=[]
         if  str(side) !="True" and str(side) !="False":
             print ("error: which side to attack")
         elif side:
             i=0
+            attack_state.append(id(self.up[pos]))
             while i<self.up[pos].get_wind():
                 temp=single_minion_battle(self.up[pos],self.down)
                 attack_state.append(temp[1])
@@ -552,6 +553,7 @@ class battlefeild:
 
         else:
             i=0
+            attack_state.append(id(self.down[pos]))
             while i<self.down[pos].get_wind():
                 temp=single_minion_battle(self.down[pos], self.up)
                 attack_state.append(temp[1])
@@ -676,7 +678,7 @@ def battle(field):
         print (field,"\n")
 
 if __name__=="__main__":
-    a=minion("cat",10,11,spe="the_boogeymonster",g=True,ch="murloc")
+    a=minion("cat",10,11,spe="zapp_slywick",g=True,ch="murloc")
     b=minion("dog",3,12,p=True,ch="murloc")
     c=minion("cat",10,11,ch="murloc")
     d=minion("cat",10,11,ch="murloc")

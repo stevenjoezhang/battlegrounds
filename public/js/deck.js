@@ -1,0 +1,288 @@
+function setSize() {
+	let height = Math.min(window.innerWidth * 10 / 12, window.innerHeight);
+	let width = Math.min(window.innerWidth, window.innerHeight * 12 / 10);
+	document.querySelector(".section-decklist").style.width = width + "px";
+	document.querySelector(".section-decklist").style.height = height + "px";
+	document.querySelector(".section-decklist").style.marginTop = (window.innerHeight - height) / 2 + "px";
+}
+setSize();
+window.addEventListener("resize", setSize);
+var minions = [];
+var gid = 0;
+
+async function fetchDB(file) {
+	let response = await fetch(file);
+	let data = await response.json();
+	console.log(data)
+	return data;
+}
+function randId(db) {
+	let target = db[Math.floor(Math.random() * db.length)];
+	return target.goldenId || target.id;
+}
+async function initBoard() {
+	window.database = await fetchDB("/js/data.json");
+	window.battle = await fetchDB("/battle.json");
+	battle[0][0].up.forEach(minion => {
+		let prop = {
+			attack: minion.atk,
+			health: minion.health,
+			belongsTo: 0,
+			id: "TB_BaconUps_038",//randId(database),//"TB_BaconUps_080",
+			gid: minion.id,
+			poison: minion.poison,
+			shield: minion.shield,
+			taunt: minion.taunt
+		};
+		minions[minion.id] = new Minion(prop);
+	});
+	battle[0][0].down.forEach(minion => {
+		let prop = {
+			attack: minion.atk,
+			health: minion.health,
+			belongsTo: 1,
+			id: "TB_BaconUps_038",//randId(database),//"TB_BaconUps_080",
+			gid: minion.id,
+			poison: minion.poison,
+			shield: minion.shield,
+			taunt: minion.taunt
+		};
+		minions[minion.id] = new Minion(prop);
+	});
+	/*
+	for (let i = 0; i < 7; i++) {
+		let prop = {
+			attack: 7,
+			health: 10,
+			belongsTo: 0,
+			id: "TB_BaconUps_093",//randId(database),//"TB_BaconUps_080",
+			gid
+		}
+		let minion = new Minion(prop);
+		minions[gid++] = minion;
+	}
+	for (let i = 0; i < 7; i++) {
+		let prop = {
+			attack: 7,
+			health: 10,
+			belongsTo: 1,
+			id: "TB_BaconUps_093",//randId(database),//"TB_BaconUps_099",
+			gid
+		}
+		let minion = new Minion(prop);
+		minions[gid++] = minion;
+	}*/
+}
+
+document.querySelectorAll(".minion").forEach(ele => {
+	//ele,
+});
+
+function Minion(prop) {
+	this.ele = document.createElement("div");
+	this.ele.setAttribute("gid", prop.gid);
+	this.gid = prop.gid;
+	this.belongsTo = prop.belongsTo;
+	this.attack = prop.attack || 0;
+	this.health = prop.health || 0;
+	this.id = prop.id;
+	this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.id));
+	this.data = database[this.dbIndex];
+	this.dead = false;
+	this.ele.insertAdjacentHTML("afterbegin", `
+			<div class="image art"></div>
+			<div class="image border"></div>
+			<div class="image taunt"></div>
+			<div class="image legendary"></div>
+			<div class="image deathrattle"></div>
+			<div class="image trigger"></div>
+			<div class="image atk-health"></div>
+			<div class="text attack">${this.attack}</div>
+			<div class="text health">${this.health}</div>
+			<div class="image shield"></div>
+			<div class="image shield"></div>
+			<div class="image blood-splat">
+				<div class="text blood-splat"></div>
+			</div>`);
+	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.id}.jpg)`;
+	document.querySelectorAll(`.minions`)[this.belongsTo].appendChild(this.ele);
+	this.initClassName = function() {
+		this.ele.classList.add("minion");
+		if (this.data.goldenId === this.id) this.ele.classList.add("golden");
+		if (this.data.divineShield) this.ele.classList.add("shield");
+		if (this.data.cleave) this.ele.classList.add("trigger");
+		["legendary", "taunt", "poisonous", "windfury", "deathrattle"].forEach(item => {
+			if (this.data[item]) this.ele.classList.add(item);
+		});
+		if (prop.taunt) this.ele.classList.add("taunt");
+		if (prop.shield) this.ele.classList.add("shield");
+		if (prop.poison) this.ele.classList.add("trigger");
+	}
+	this.initClassName();
+	this.setShield = function(state) {
+		state ? this.ele.classList.add("shield") : this.ele.classList.remove("shield");
+	}
+	this.setHealth = function(health) {
+		let deltaHealth = health - this.health;
+		this.health = health;
+		this.ele.querySelector(".text.health").innerText = this.health;
+		if (deltaHealth < 0) {
+			setTimeout(() => {
+				this.ele.classList.add("blood-splat");
+				console.log("ADD")
+			}, 0);
+			this.ele.querySelector(".text.blood-splat").innerText = deltaHealth;
+			setTimeout(() => {
+				this.ele.classList.remove("blood-splat");
+				console.log("RM")
+			}, 2900);
+			return new Promise(resolve => {
+				setTimeout(resolve, 2500);
+			});
+		}
+	}
+	this.setAttack = function(attack) {
+		this.attack = attack;
+		this.ele.querySelector(".text.attack").innerText = this.attack;
+	}
+	this.doAttack = function(target) {
+		if (this.dead) return;
+		let targetEle = minions[target].ele;
+		let deltaX = targetEle.getBoundingClientRect().x - this.ele.getBoundingClientRect().x;
+		let deltaY = targetEle.getBoundingClientRect().y - this.ele.getBoundingClientRect().y;
+		//deltaX > 0 ? deltaX -= this.ele.offsetWidth / 3 : deltaX += this.ele.offsetWidth / 3;
+		//deltaY > 0 ? deltaY -= this.ele.offsetHeight / 3 : deltaY += this.ele.offsetHeight / 3;
+		document.querySelectorAll(".minions")[this.belongsTo].style.cssText = "z-index: 100;";
+		document.querySelectorAll(".minions")[1 - this.belongsTo].style.cssText = "z-index: 0;";
+		document.getElementById("attack-style").innerHTML = `@keyframes attacking {
+				0% {
+					transform: translate3d(0, 0, 0);
+				}
+				40% {
+					transform: translate3d(0, 0, 2vw);
+				}
+				60% {
+					transform: translate3d(${deltaX}px, ${deltaY}px, 0);
+				}
+				61% {
+					transform: translate3d(${deltaX}px, ${deltaY}px, 0) rotateX(-30deg);
+				}
+				80% {
+					transform: translate3d(0, 0, 0) rotateX(-30deg);
+				}
+				100% {
+					transform: translate3d(0, 0, 0);
+				}
+			}
+			.attacking {
+				animation: attacking 1s;
+				z-index: 100;
+			}
+			`;
+		this.ele.classList.add("attacking");
+		return new Promise(resolve => {
+			setTimeout(() => {
+				document.querySelector(".section-decklist").classList.add(this.belongsTo === 0 ? "shake-down" : "shake-up");
+				resolve();
+				setTimeout(() => {
+					document.querySelector(".section-decklist").classList.remove(this.belongsTo === 0 ? "shake-down" : "shake-up");
+					this.ele.classList.remove("attacking");
+				}, 500);
+			}, 500);
+		});
+	}
+	this.createDeathRattleAnim = function() {
+		var animEle = document.createElement("div");
+		animEle.classList.add("deathrattle-die");
+		animEle.style.left = this.ele.getBoundingClientRect().left + this.ele.offsetWidth / 2 + "px";
+		animEle.style.bottom = window.innerHeight - this.ele.getBoundingClientRect().bottom + "px";
+		animEle.style.width = this.ele.offsetWidth + "px";
+		animEle.style.height = this.ele.offsetHeight + "px";
+		return animEle;
+	}
+	this.die = function() {
+		if (this.dead) return;
+		this.dead = true;
+		if (this.data.deathrattle) {
+			var animEle = this.createDeathRattleAnim();
+		}
+		this.ele.classList.add("dying");
+		return new Promise(resolve => {
+			setTimeout(() => {
+				if (animEle) {
+					document.body.appendChild(animEle);
+					setTimeout(() => {
+						document.body.removeChild(animEle);
+					}, 4000);
+				}
+				this.ele.parentNode.removeChild(this.ele);
+				resolve();
+			}, 1500);
+		});
+	}
+}
+/*
+var queue = [
+	() => minions[0].doAttack(8),
+	[() => minions[8].setHealth(3), () => minions[0].setHealth(3)],
+	() => minions[0].doAttack(8),
+	[() => minions[8].setHealth(-4), () => minions[0].setHealth(-4)],
+	[() => minions[8].die(), () => minions[0].die()]
+];
+
+*/
+
+(async () => {
+	await initBoard();
+	//var queue = [];
+
+	for (let i in battle[1]) {
+		i = Number(i);
+		let attacking = battle[1][i];
+		let result = battle[0][i + 1];
+		await minions[attacking[0]].doAttack(attacking[1]);
+		let queue = {
+			health: [],
+			die: []
+		};
+		for (let i in minions) {
+			let minion = minions[i];
+			if (minion.dead) continue;
+			let downIndex = result.down.findIndex(ele => {
+				return ele.id === minion.gid;
+			});
+			let upIndex = result.up.findIndex(ele => ele.id === minion.gid);
+			//console.log(downIndex, upIndex);
+			if (downIndex === -1 && upIndex === -1) queue.die.push(() => minion.die());
+			else {
+				if (downIndex !== -1) {
+					queue.health.push(() => minion.setHealth(result.down[downIndex].health));
+					queue.health.push(() => minion.setAttack(result.down[downIndex].atk));
+					queue.health.push(() => minion.setShield(result.down[downIndex].shield));
+				} else {
+					queue.health.push(() => minion.setHealth(result.up[upIndex].health));
+					queue.health.push(() => minion.setAttack(result.up[upIndex].atk));
+					queue.health.push(() => minion.setShield(result.up[upIndex].shield));
+				}
+			}
+		}
+		await Promise.all(queue.health.map(ele => ele()));
+		await Promise.all(queue.die.map(ele => ele()));
+		await new Promise(resolve => {
+			setTimeout(resolve, 1000);
+		});
+	}
+})();
+/*
+async function animation(queue) {
+	for (let anim of queue) {
+		if (typeof anim === "function") {
+			await anim();
+		} else {
+			await Promise.all(anim.map(ele => ele()));
+		}
+	}
+}
+
+animation(queue);
+*/

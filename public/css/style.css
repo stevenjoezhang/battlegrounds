@@ -1,0 +1,214 @@
+.container {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-attachment: fixed;
+	background-image: url(/img/TheBox_Table.png);
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
+	cursor: url(/img/EyeHalf.png), auto;
+	margin: 0;
+	background-color: #fff;
+}
+.deck-entry:hover {
+	cursor: url(/img/EyeOpen.png), auto;
+}
+.container:active {
+	cursor: url(/img/EyeClosed.png), auto;
+}
+.section-decklist {
+	transform-origin: top left;
+	position: relative;
+	overflow: scroll;
+	margin: 0 auto;
+}
+.background {
+	position: absolute;
+	width: 100%;
+}
+.minions {
+	position: absolute;
+	width: 80%;
+	height: 16%;
+	left: 9%;
+	display: flex;
+	/*background-color: white;*/
+	justify-content: center;
+	perspective: 80vw;
+}
+.top {
+	top: 31.5%;
+	perspective-origin: top;
+}
+.bottom {
+	bottom: 35%;
+	perspective-origin: bottom;
+}
+.minion {
+	width: 14.2%;
+	height: 100%;
+	/*background-color: green;*/
+	position: relative;
+}
+.minion .image {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	background-position: center;
+	background-size: 100%;
+	background-repeat: no-repeat;
+	left: 50%;
+	transform: translateX(-50%) scale(1.5);
+}
+.minion .image.art {
+	background-position: center 5%;
+	background-size: 100%;
+	transform: translateX(-50%);
+	clip-path: ellipse(37% 47% at center);
+}
+.border {
+	background-image: url(/img/border.png);
+}
+.minion.golden .border {
+	background-image: url(/img/border-golden.png);
+}
+.atk-health {
+	background-image: url(/img/atk-health.png);
+}
+.minion.taunt .taunt {
+	background-image: url(/img/taunt.png);
+}
+.minion.taunt.golden .taunt {
+	background-image: url(/img/taunt-golden.png);
+}
+.minion.legendary .legendary {
+	background-image: url(/img/legendary.png);
+}
+.minion.legendary.golden .legendary {
+	background-image: url(/img/legendary-golden.png);
+}
+.minion.deathrattle .deathrattle {
+	background-image: url(/img/deathrattle.png);
+}
+.minion.trigger .trigger {
+	background-image: url(/img/trigger.png);
+}
+.minion.shield .shield {
+	background-image: url(/img/divine-shield.png);
+}
+.image.blood-splat {
+	display: none;
+	transform: translateX(-50%) scale(1);
+}
+.minion.blood-splat .image.blood-splat {
+	display: block;
+	background-image: url(/img/blood-splat.png);
+	animation: splat 3s forwards;
+}
+.minion.dying {
+	animation: deploy 1.5s infinite;
+}
+@keyframes splat {
+	0% {
+		transform: translateX(-50%) scale(0);
+	}
+	10% {
+		transform: translateX(-50%) scale(1);
+	}
+	70% {
+		transform: translateX(-50%) scale(1);
+		opacity: 1;
+	}
+	100% {
+		transform: translateX(-50%) scale(1);
+		opacity: 0;
+	}
+}
+@keyframes deploy {
+	0% {
+		transform: scale(1);
+		max-width: 15vw;
+		opacity: 1;
+		filter: grayscale(0);
+	}
+	50% {
+		transform: scale(1);
+		max-width: 15vw;
+		opacity: 1;
+		filter: grayscale(1);
+	}
+	100% {
+		transform: scale(0);
+		max-width: 0;
+		opacity: 0;
+		filter: grayscale(1);
+	}
+}
+.section-decklist.shake-down {
+	animation: shake-down .2s;
+}
+@keyframes shake-down {
+	0% {}
+	50% {
+		transform: translateY(10px);
+	}
+	100% {}
+}
+.section-decklist.shake-up {
+	animation: shake-up .2s;
+}
+@keyframes shake-up {
+	0% {}
+	50% {
+		transform: translateY(-10px);
+	}
+	100% {}
+}
+.text {
+	color: white;
+	position: absolute;
+	font-size: 160%;
+}
+.text.blood-splat {
+	top: 35%;
+	left: 50%;
+	transform: translateX(-50%) rotate(-25deg);
+}
+.text.attack, .text.health {
+	top: 60%;
+}
+.text.attack {
+	left: 26%;
+	transform: translateX(-50%);
+}
+.text.health {
+	right: 23%;
+	transform: translateX(50%);
+}
+
+.deathrattle-die {
+	background-image: url(/img/deathrettle-die.png);
+	animation: die 4s forwards;
+	transform-origin: bottom center;
+	position: fixed;
+	background-position: center;
+	background-size: 128%;
+	background-repeat: no-repeat;
+}
+@keyframes die {
+	0% {
+		transform: translateX(-50%) translateY(10%) scale(0.3);
+		opacity: 0.2;
+	}
+	80% {
+		transform: translateX(-50%) translateY(0%) scale(1);
+		opacity: 1;
+	}
+	100% {
+		transform: translateX(-50%) translateY(0%) scale(1);
+		opacity: 0;
+	}
+}
