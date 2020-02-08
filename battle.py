@@ -105,7 +105,7 @@ class minion:
         else:
             print ("error: wrong poison set")
 
-    def get_posion(self):
+    def get_poison(self):
         return self.poison
 
     def set_wind(self,w):
@@ -451,7 +451,30 @@ class battlefeild:
         self.down_after_attack=downa
         #self.begin=None #True 表示上面先动
         self.now =None  #表示运行到第几个,第一表示该第几个，第二表示示该上方或下方,True 表示上方
-        #self.special_minion=[]
+        self.history = []
+        self.atkHistory = []
+        self.log = ""
+
+    def dump(self):
+        self.log += self.__str__() + "\n";
+        #print (self,"\n")
+        #print(self.history)
+        current = {
+            "up": [],
+            "down": []
+        }
+        for [name, board] in [["up", self.up], ["down", self.down]]:
+            for minion in board:
+                current[name].append({
+                    "id": id(minion),
+                    "atk": minion.get_calculated_attack(),
+                    "health": minion.get_calculated_health(),
+                    "shield": minion.get_shield(),
+                    "taunt": minion.get_taunt(),
+                    "poison": minion.get_poison(),
+                    "golden": minion.get_golden()
+                })
+        self.history.append(current)
 
     def set_now(self,num,side):
         if num>6 or num<0:
@@ -667,16 +690,20 @@ class battlefeild:
 
 def battle(field):
     field.battle_begin()
-    print (field,"\n")
+    field.dump()
+   # print (field,"\n")
     while field.up_minion()>0 and field.down_minion()>0:
         attack_list=field.minion_battle()
-        print (attack_list)
+        field.atkHistory.append(attack_list)
+        #print (attack_list)
         #field.detect_death()
         field.remove_death()
         field.renew_attack()
         field.renew_buff()
-        print (field,"\n")
-
+        field.dump()
+        #print (field,"\n")
+    print (field.log)
+'''
 if __name__=="__main__":
     a=minion("cat",10,11,spe="zapp_slywick",g=True,ch="murloc")
     b=minion("dog",3,12,p=True,ch="murloc")
@@ -698,7 +725,7 @@ if __name__=="__main__":
     ba.add_minion(g,"down",0)
     battle(ba)
 
-'''
+
 lst=[0,2,3]
 lst.insert(6,'x')
 print (lst,len(lst))
