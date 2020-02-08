@@ -23,32 +23,24 @@ function randId(db) {
 async function initBoard() {
 	window.database = await fetchDB("/js/data.json");
 	window.battle = await fetchDB("/battle.json");
-	battle[0][0].up.forEach(minion => {
-		let prop = {
-			attack: minion.atk,
-			health: minion.health,
-			belongsTo: 0,
-			id: "TB_BaconUps_038",//randId(database),//"TB_BaconUps_080",
-			gid: minion.id,
-			poison: minion.poison,
-			shield: minion.shield,
-			taunt: minion.taunt
-		};
-		minions[minion.id] = new Minion(prop);
-	});
-	battle[0][0].down.forEach(minion => {
-		let prop = {
-			attack: minion.atk,
-			health: minion.health,
-			belongsTo: 1,
-			id: "TB_BaconUps_038",//randId(database),//"TB_BaconUps_080",
-			gid: minion.id,
-			poison: minion.poison,
-			shield: minion.shield,
-			taunt: minion.taunt
-		};
-		minions[minion.id] = new Minion(prop);
-	});
+	function addMinion(position, index) {
+		battle[0][0][position].forEach(minion => {
+			let prop = {
+				attack: minion.atk,
+				health: minion.health,
+				belongsTo: index,
+				id: "TB_BaconUps_038",//randId(database),//"TB_BaconUps_080",
+				gid: minion.id,
+				poison: minion.poison,
+				shield: minion.shield,
+				taunt: minion.taunt,
+				golden: minion.golden
+			};
+			minions[minion.id] = new Minion(prop);
+		});
+	}
+	addMinion("up", 0);
+	addMinion("down", 1);
 	/*
 	for (let i = 0; i < 7; i++) {
 		let prop = {
@@ -118,7 +110,8 @@ function Minion(prop) {
 	document.querySelectorAll(`.minions`)[this.belongsTo].appendChild(this.ele);
 	this.initClassName = function() {
 		this.ele.classList.add("minion");
-		if (this.data.goldenId === this.id) this.ele.classList.add("golden");
+		//if (this.data.goldenId === this.id) this.ele.classList.add("golden");
+		if (prop.golden) this.ele.classList.add("golden");
 		if (this.data.divineShield) this.ele.classList.add("shield");
 		if (this.data.cleave) this.ele.classList.add("trigger");
 		["legendary", "taunt", "poisonous", "windfury", "deathrattle"].forEach(item => {

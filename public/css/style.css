@@ -39,11 +39,11 @@
 	justify-content: center;
 	perspective: 80vw;
 }
-.top {
+.up {
 	top: 31.5%;
 	perspective-origin: top;
 }
-.bottom {
+.down {
 	bottom: 35%;
 	perspective-origin: bottom;
 }
@@ -221,4 +221,5 @@
 	color: white;
 	font-size: large;
 	overflow: scroll;
+	z-index: 200;
 }
