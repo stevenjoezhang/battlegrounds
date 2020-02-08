@@ -331,7 +331,7 @@ def select_minion(lst): #选择目标
             num.append(i)
     if len(num)==0:
         return avail[random.randint(0,len(avail)-1)]
-    elif len(num)>0 and len(num)<len(avail):
+    elif len(num)>0 and len(num)<=len(avail):
         return num[random.randint(0, len(num)-1)]
     else:
         print ("error: wrong select")
