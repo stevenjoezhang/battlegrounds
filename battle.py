@@ -475,7 +475,8 @@ class battlefeild:
                     "shield": minion.get_shield(),
                     "taunt": minion.get_taunt(),
                     "poison": minion.get_poison(),
-                    "golden": minion.get_golden()
+                    "golden": minion.get_golden(),
+                    "death": minion.get_death()
                 })
         self.history.append(current)
 
@@ -751,9 +752,11 @@ def battle(field):
         #field.detect_death()
         #field.dump()
         field.renew_buff()
+        field.dump()
         field.remove_death()
         field.renew_attack()
-        field.dump()
+
+
         print (field,"\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
     print (field.log)
