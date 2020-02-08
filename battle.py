@@ -1,6 +1,7 @@
 import random
 ch_list=("beast","murloc","mech","demon","all")
-special_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye","zapp_slywick","foe_reaper_4000","cave_hydra","ironhide_direhorn","the_boogeymonster","festeroot_hulk","scavenging_hyena","junkbot", "soul_juggler")
+special_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye",\
+              "zapp_slywick","foe_reaper_4000","cave_hydra","ironhide_direhorn","the_boogeymonster","festeroot_hulk","scavenging_hyena","junkbot", "soul_juggler")
 #m_b_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye")
 #d_s_list=("Mecharoo","")
 
@@ -397,7 +398,7 @@ def single_minion_battle(m,m_lst):
         if aim!=-1:
             usual_minion_battle(m, m_lst[aim])
             be_attack.append(aim)
-            if m_lst[aim].get_damage() >= (m_lst[aim].get_health() + m_lst[aim].get_buff_health()):
+            if m_lst[aim].get_damage() >= (m_lst[aim].get_health() + m_lst[aim].get_buff_health()) and m.get_damage() < (m.get_health() + m.get_buff_health()):
                 if m.get_golden():
                     m.set_health(4)
                     m.set_attack(4)
@@ -454,6 +455,8 @@ class battlefeild:
         self.history = []
         self.atkHistory = []
         self.log = ""
+        self.attack_time=1
+        self.already_attack=1
 
     def dump(self):
         self.log += self.__str__() + "\n";
@@ -483,6 +486,24 @@ class battlefeild:
             print ("error: wrong side")
         else:
             self.now=[num,side]
+
+    def set_attack_time(self):
+        if self.now[1]:
+            print (self.now)
+            self.attack_time=self.up[self.now[0]].get_wind()
+        else:
+            self.attack_time=self.down[self.now[0]].get_wind()
+    def get_attack_time(self):
+        return self.attack_time
+
+    def reset_already_attack(self):
+        self.already_attack=1
+    def add_already_attack(self):
+        self.already_attack+=1
+    def get_already_attack(self):
+        return self.already_attack
+    def attack_over(self):
+        self.already_attack=self.attack_time
 
     def add_minion(self,mi,side,pos):
         if side=="up":
@@ -516,17 +537,21 @@ class battlefeild:
         if minionup> miniondown:
             #self.begin=True
             self.set_now(0,True)
+            self.set_attack_time()
         elif minionup< miniondown:
             #self.begin=False
             self.set_now(0, False)
+            self.set_attack_time()
         else:
             a=random.random()
             if a>=0.5:
                # self.begin = True
                 self.set_now(0, True)
+                self.set_attack_time()
             else:
                 #self.begin =False
                 self.set_now(0,False)
+                self.set_attack_time()
         origin_minion_buff(self.up)
         origin_minion_buff(self.down)#oldmurkeye比较特殊，考虑对面,专门处理
         murloc_num=0
@@ -563,28 +588,19 @@ class battlefeild:
         if  str(side) !="True" and str(side) !="False":
             print ("error: which side to attack")
         elif side:
-            i=0
             attack_state.append(id(self.up[pos]))
-            while i<self.up[pos].get_wind():
-                temp=single_minion_battle(self.up[pos],self.down)
-                attack_state.append(temp[1])
-                self.detect_death()
-                if self.up[pos].get_death():#检测自己死没死
-                    break
-                after_attack(self.up)
-                i+=1
-
+            temp=single_minion_battle(self.up[pos],self.down)
+            attack_state.append(temp[1])
+            self.detect_death()
+            after_attack(self.up)
+            attack_state.append(self.up[pos].get_death())
         else:
-            i=0
             attack_state.append(id(self.down[pos]))
-            while i<self.down[pos].get_wind():
-                temp=single_minion_battle(self.down[pos], self.up)
-                attack_state.append(temp[1])
-                self.detect_death()
-                if self.down[pos].get_death():#检测自己死没死
-                    break
-                after_attack(self.down)
-                i+=1
+            temp=single_minion_battle(self.down[pos], self.up)
+            attack_state.append(temp[1])
+            self.detect_death()
+            after_attack(self.down)
+            attack_state.append(self.down[pos].get_death())
         return attack_state
 
 
@@ -606,36 +622,70 @@ class battlefeild:
         pass
 
     def renew_attack(self):
-        side= not self.now[1]
-        uppos,downpos=-1,-1
-        if self.now[1]:  #移除待定替换为已动，注意有奇怪的延迟，刚行动的马上被对面移除，子产物会行动，移动待定状态会延迟一回合
-            for i in self.down:
-                if i.get_move()==2:
-                    i.set_move(1)
+        if self.attack_time>self.already_attack:#未到行动数
+            side=self.now[1]
+            if side:  #找到该谁行动，更新序号
+                num=-1
+                for i in range(len(self.up)):
+                    if self.up[i].get_move()==2:
+                        num=i
+                        break
+                if num==-1:
+                    print("error: no one attack")
+                else:
+                    self.set_now(num,side)
+                    self.add_already_attack()
+            else:
+                num = -1
+                for i in range(len(self.down)):
+                    if self.down[i].get_move() == 2:
+                        num = i
+                        break
+                if num == -1:
+                    print("error: no one attack")
+                else:
+                    self.set_now(num, side)
+                    self.add_already_attack()
         else:
-            for i in self.up:
-                if i.get_move()==2:
-                    i.set_move(1)
-        if side:
-            for i in range(len(self.up)):
-                if self.up[i].get_move()==0:
-                    uppos=i
-                    break
-            if uppos==-1:
-                uppos=0
-                for i in self.up:
-                    i.set_move(0)
-            self.set_now(uppos,side)
-        else:
-            for j in range(len(self.down)):
-                if self.down[j].get_move()==0:
-                    downpos=j
-                    break
-            if downpos==-1:
-                downpos=0
+            self.reset_already_attack()
+            side= not self.now[1]
+            uppos,downpos=-1,-1
+            if self.now[1]:  #移除待定替换为已动，注意有奇怪的延迟，刚行动的马上被对面移除，子产物会行动，移动待定状态会延迟一回合
                 for i in self.down:
-                    i.set_move(0)
-            self.set_now(downpos, side)
+                    if i.get_move()==2:
+                        i.set_move(1)
+            else:
+                for i in self.up:
+                    if i.get_move()==2:
+                        i.set_move(1)
+            if side:
+                if len(self.up)!=0:
+                    for i in range(len(self.up)):
+                        if self.up[i].get_move()==0:
+                            uppos=i
+                            break
+                    if uppos==-1:
+                        uppos=0
+                        for i in self.up:
+                            i.set_move(0)
+                    self.set_now(uppos,side)
+                    self.set_attack_time()
+                else:
+                    pass
+            else:
+                if len(self.down)!=0:
+                    for j in range(len(self.down)):
+                        if self.down[j].get_move()==0:
+                            downpos=j
+                            break
+                    if downpos==-1:
+                        downpos=0
+                        for i in self.down:
+                            i.set_move(0)
+                    self.set_now(downpos, side)
+                    self.set_attack_time()
+                else:
+                    pass
 
     def renew_buff(self):
         temp_up=[]
@@ -691,18 +741,22 @@ class battlefeild:
 def battle(field):
     field.battle_begin()
     field.dump()
-   # print (field,"\n")
+    print (field,"\n")
     while field.up_minion()>0 and field.down_minion()>0:
         attack_list=field.minion_battle()
-        field.atkHistory.append(attack_list)
+        field.atkHistory.append(attack_list[0:2])
+        if attack_list[2]:
+            field.attack_over()
         #print (attack_list)
         #field.detect_death()
         field.remove_death()
         field.renew_attack()
         field.renew_buff()
         field.dump()
-        #print (field,"\n")
+        print (field,"\n")
+        print (field.get_already_attack()," ",field.get_attack_time())
     print (field.log)
+
 '''
 if __name__=="__main__":
     a=minion("cat",10,11,spe="zapp_slywick",g=True,ch="murloc")
