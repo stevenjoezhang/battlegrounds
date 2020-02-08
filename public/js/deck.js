@@ -41,34 +41,7 @@ async function initBoard() {
 	}
 	addMinion("up", 0);
 	addMinion("down", 1);
-	/*
-	for (let i = 0; i < 7; i++) {
-		let prop = {
-			attack: 7,
-			health: 10,
-			belongsTo: 0,
-			id: "TB_BaconUps_093",//randId(database),//"TB_BaconUps_080",
-			gid
-		}
-		let minion = new Minion(prop);
-		minions[gid++] = minion;
-	}
-	for (let i = 0; i < 7; i++) {
-		let prop = {
-			attack: 7,
-			health: 10,
-			belongsTo: 1,
-			id: "TB_BaconUps_093",//randId(database),//"TB_BaconUps_099",
-			gid
-		}
-		let minion = new Minion(prop);
-		minions[gid++] = minion;
-	}*/
 }
-
-document.querySelectorAll(".minion").forEach(ele => {
-	//ele,
-});
 
 function makeid(length) {
 	var result = '';
@@ -87,6 +60,7 @@ function Minion(prop) {
 	this.belongsTo = prop.belongsTo;
 	this.attack = prop.attack || 0;
 	this.health = prop.health || 0;
+	this.shield = prop.shield;
 	this.id = prop.id;
 	this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.id));
 	this.data = database[this.dbIndex];
@@ -115,33 +89,45 @@ function Minion(prop) {
 		if (prop.golden) this.ele.classList.add("golden");
 		if (this.data.divineShield) this.ele.classList.add("shield");
 		if (this.data.cleave) this.ele.classList.add("trigger");
-		["legendary", "taunt", "poisonous", "windfury", "deathrattle"].forEach(item => {
+		["legendary", "taunt", "poisonous", "windfury", "deathrattle", "shield"].forEach(item => {
 			if (this.data[item]) this.ele.classList.add(item);
 		});
 		if (prop.taunt) this.ele.classList.add("taunt");
-		if (prop.shield) this.ele.classList.add("shield");
+		if (prop.shield) this.ele.classList.add("shield");//this.shield
 		if (prop.poison) this.ele.classList.add("poison");//trigger
 	}
 	this.initClassName();
 	this.setShield = function(state) {
-		state ? this.ele.classList.add("shield") : this.ele.classList.remove("shield");
+		if (this.shield === state) return;
+		this.shield = state;
+		if (state) this.ele.classList.add("shield");
+		else {
+			this.ele.classList.add("lose-shield");
+			setTimeout(() => {
+				this.ele.classList.remove("shield", "lose-shield");
+			}, 2000);
+			return this.splat("-0");
+		}
 	}
 	this.setHealth = function(health) {
 		let deltaHealth = health - this.health;
 		this.health = health;
 		this.ele.querySelector(".text.health").innerText = this.health;
 		if (deltaHealth < 0) {
-				this.ele.classList.add("blood-splat");
-				console.log("ADD")
-			this.ele.querySelector(".text.blood-splat").innerText = deltaHealth;
-			setTimeout(() => {
-				this.ele.classList.remove("blood-splat");
-				console.log("RM")
-			}, 2900);
-			return new Promise(resolve => {
-				setTimeout(resolve, 2500);
-			});
+			return this.splat(deltaHealth);
 		}
+	}
+	this.splat = function(value) {
+		this.ele.classList.add("blood-splat");
+		console.log("ADD")
+		this.ele.querySelector(".text.blood-splat").innerText = value;
+		setTimeout(() => {
+			this.ele.classList.remove("blood-splat");
+			console.log("RM")
+		}, 2900);
+		return new Promise(resolve => {
+			setTimeout(resolve, 2500);
+		});
 	}
 	this.setAttack = function(attack) {
 		this.attack = attack;
@@ -183,8 +169,8 @@ function Minion(prop) {
 				z-index: 100;
 			}
 			`;
-			this.ele.classList.add(`attacking-${rid}`);
-			console.log("ATK", new Date().getSeconds(), new Date().getMilliseconds())
+		this.ele.classList.add(`attacking-${rid}`);
+		console.log("ATK", new Date().getSeconds(), new Date().getMilliseconds())
 		return new Promise(resolve => {
 			setTimeout(() => {
 				document.querySelector(".section-decklist").classList.add(this.belongsTo === 0 ? "shake-down" : "shake-up");
@@ -192,8 +178,8 @@ function Minion(prop) {
 				console.log("RESOLVE", new Date().getSeconds(), new Date().getMilliseconds())
 				setTimeout(() => {
 					document.querySelector(".section-decklist").classList.remove(this.belongsTo === 0 ? "shake-down" : "shake-up");
-						this.ele.classList.remove(`attacking-${rid}`);
-						console.log("STOP", new Date().getSeconds(), new Date().getMilliseconds())
+					this.ele.classList.remove(`attacking-${rid}`);
+					console.log("STOP", new Date().getSeconds(), new Date().getMilliseconds())
 				}, 500);
 			}, 500);
 		});
@@ -249,16 +235,21 @@ function Minion(prop) {
 			});
 			let upIndex = result.up.findIndex(ele => ele.id === minion.gid);
 			//console.log(downIndex, upIndex);
-			if (downIndex === -1 && upIndex === -1) queue.die.push(() => minion.die());
+			if (downIndex === -1 && upIndex === -1) queue.die.push(() => minion.die());//可以移除
 			else {
+				let target;
 				if (downIndex !== -1) {
-					queue.health.push(() => minion.setHealth(result.down[downIndex].health));
-					queue.health.push(() => minion.setAttack(result.down[downIndex].atk));
-					queue.health.push(() => minion.setShield(result.down[downIndex].shield));
+					target = result.down[downIndex];
+					queue.health.push(() => minion.setHealth(target.health));
+					queue.health.push(() => minion.setAttack(target.atk));
+					queue.health.push(() => minion.setShield(target.shield));
+					if (target.death) queue.die.push(() => minion.die());
 				} else {
-					queue.health.push(() => minion.setHealth(result.up[upIndex].health));
-					queue.health.push(() => minion.setAttack(result.up[upIndex].atk));
-					queue.health.push(() => minion.setShield(result.up[upIndex].shield));
+					target = result.up[upIndex];
+					queue.health.push(() => minion.setHealth(target.health));
+					queue.health.push(() => minion.setAttack(target.atk));
+					queue.health.push(() => minion.setShield(target.shield));
+					if (target.death) queue.die.push(() => minion.die());
 				}
 			}
 		}
@@ -274,6 +265,32 @@ function Minion(prop) {
 	}
 })();
 /*
+
+document.querySelectorAll(".minion").forEach(ele => {
+	//ele,
+});
+	for (let i = 0; i < 7; i++) {
+		let prop = {
+			attack: 7,
+			health: 10,
+			belongsTo: 0,
+			id: "TB_BaconUps_093",//randId(database),//"TB_BaconUps_080",
+			gid
+		}
+		let minion = new Minion(prop);
+		minions[gid++] = minion;
+	}
+	for (let i = 0; i < 7; i++) {
+		let prop = {
+			attack: 7,
+			health: 10,
+			belongsTo: 1,
+			id: "TB_BaconUps_093",//randId(database),//"TB_BaconUps_099",
+			gid
+		}
+		let minion = new Minion(prop);
+		minions[gid++] = minion;
+	}
 var queue = [
 	() => minions[0].doAttack(8),
 	[() => minions[8].setHealth(3), () => minions[0].setHealth(3)],

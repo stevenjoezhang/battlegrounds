@@ -5,7 +5,7 @@ from multiprocessing import Process, Queue, cpu_count
 app = Flask(__name__, static_url_path='', static_folder='public')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-from battles import minion, battlefeild, battle
+from battle import minion, battlefeild, battle
 
 def run(queue):
     a=minion("cat",10,11,spe="the_boogeymonster",g=True,ch="murloc")
