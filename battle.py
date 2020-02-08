@@ -1,7 +1,8 @@
 import random
 ch_list=("beast","murloc","mech","demon","all")
 special_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye",\
-              "zapp_slywick","foe_reaper_4000","cave_hydra","ironhide_direhorn","the_boogeymonster","festeroot_hulk","scavenging_hyena","junkbot", "soul_juggler")
+              "zapp_slywick","foe_reaper_4000","cave_hydra","ironhide_direhorn","the_boogeymonster",\
+              "festeroot_hulk","scavenging_hyena","junkbot", "soul_juggler")
 #m_b_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye")
 #d_s_list=("Mecharoo","")
 
@@ -318,7 +319,7 @@ def add_minion_buff(lst):  #所有minion_buff
                             lst[j].set_buff([2, 2])
         else:
             pass
-
+'''未移除death minion的选择目标
 def select_minion(lst): #选择目标
     num=[]
     avail=[]
@@ -336,14 +337,8 @@ def select_minion(lst): #选择目标
         return num[random.randint(0, len(num)-1)]
     else:
         print ("error: wrong select")
-def usual_minion_battle(minion1,minion2): #minion1是攻击方
-    minion1.minion_attack(minion2)
-    minion2.minion_attack(minion1)
-    minion1.set_move(2)
-def single_minion_battle(m,m_lst):
-    be_attack=[]
-    aim=-2
-    if m.get_special() == "zapp_slywick":
+        
+  if m.get_special() == "zapp_slywick":
         if m.get_golden():
             m.set_wind(4)
         else:
@@ -364,59 +359,94 @@ def single_minion_battle(m,m_lst):
             aim = random.choice(temp1)
             be_attack.append(aim)
             usual_minion_battle(m,m_lst[aim])
+        '''
+def select_minion(lst): #选择目标
+    num=[]
+    for i in range(len(lst)):
+        if lst[i].get_taunt():
+            num.append(i)
+    if len(num)==0:#无taunt
+        return random.randint(0,len(lst)-1)
+    elif len(num)>0 and len(num)<=len(lst):
+        return random.choice(num)
+    else:
+        print ("error: wrong select")
+def usual_minion_battle(minion1,minion2): #minion1是攻击方
+    minion1.minion_attack(minion2)
+    minion2.minion_attack(minion1)
+    minion1.set_move(2)
+def single_minion_battle(m,m_lst):
+    be_attack=[]
+    aim=-2
+    if m.get_special() == "zapp_slywick":
+        if m.get_golden():
+            m.set_wind(4)
+        else:
+            m.set_wind(2)
+        temp=[]
+        temp1 = []
+        for i in m_lst: #记录所有可攻击对象的攻击和序号
+            temp.append(i.get_calculated_attack())
+        min1 = min(temp)
+        for i in range(len(temp)):
+            if temp[i] == min1:
+                temp1.append(i)  #记录所有最低攻对应的序号
+        aim = random.choice(temp1)
+        be_attack.append(aim)
+        usual_minion_battle(m,m_lst[aim])
     elif m.get_special() == ("foe_reaper_4000" or "cave_hydra"):
         aim =select_minion(m_lst)
         minionlist = len(m_lst)
-        if aim !=-1:
-            if minionlist == 1:
-                m.minion_attack(m_lst[aim])
-                m_lst[aim].minion_attack(m)
-                be_attack.append( aim)
-            elif aim == 0:
-                m.minion_attack(m_lst[aim])
-                m_lst[aim].minion_attack(m)
-                m_lst[aim + 1].minion_attack(m)
-                be_attack.append(aim)
-                be_attack.append(aim+1)
-            elif aim == minionlist - 1:
-                m.minion_attack(m_lst[aim])
-                m_lst[aim].minion_attack(m)
-                m_lst[aim - 1].minion_attack(m)
-                be_attack.append(aim)
-                be_attack.append(aim-1)
-            else:
-                m.minion_attack(m_lst[aim])
-                m_lst[aim].minion_attack(m)
-                m_lst[aim + 1].minion_attack(m)
-                m_lst[aim - 1].minion_attack(m)
-                be_attack.append(aim)
-                be_attack.append(aim-1)
-                be_attack.append(aim+1)
+   #     if aim !=-1:
+        if minionlist == 1:
+            m.minion_attack(m_lst[aim])
+            m_lst[aim].minion_attack(m)
+            be_attack.append( aim)
+        elif aim == 0:
+            m.minion_attack(m_lst[aim])
+            m_lst[aim].minion_attack(m)
+            m_lst[aim + 1].minion_attack(m)
+            be_attack.append(aim)
+            be_attack.append(aim+1)
+        elif aim == minionlist - 1:
+            m.minion_attack(m_lst[aim])
+            m_lst[aim].minion_attack(m)
+            m_lst[aim - 1].minion_attack(m)
+            be_attack.append(aim)
+            be_attack.append(aim-1)
+        else:
+            m.minion_attack(m_lst[aim])
+            m_lst[aim].minion_attack(m)
+            m_lst[aim + 1].minion_attack(m)
+            m_lst[aim - 1].minion_attack(m)
+            be_attack.append(aim)
+            be_attack.append(aim-1)
+            be_attack.append(aim+1)
             m.set_move(2)
     elif m.get_special() == "the_boogeymonster":
         aim = select_minion(m_lst)
-        if aim!=-1:
-            usual_minion_battle(m, m_lst[aim])
-            be_attack.append(aim)
-            if m_lst[aim].get_damage() >= (m_lst[aim].get_health() + m_lst[aim].get_buff_health()) and m.get_damage() < (m.get_health() + m.get_buff_health()):
-                if m.get_golden():
-                    m.set_health(4)
-                    m.set_attack(4)
-                else:
-                    m.set_health(2)
-                    m.set_attack(2)
+       # if aim!=-1:
+        usual_minion_battle(m, m_lst[aim])
+        be_attack.append(aim)
+        if m_lst[aim].get_damage() >= (m_lst[aim].get_health() + m_lst[aim].get_buff_health()) and m.get_damage() < (m.get_health() + m.get_buff_health()):
+            if m.get_golden():
+                m.set_health(4)
+                m.set_attack(4)
+            else:
+                m.set_health(2)
+                m.set_attack(2)
     elif m.get_special() == "ironhide_direhorn":
         aim = select_minion(m_lst)
-        if aim!=-1:
-            usual_minion_battle(m, m_lst[aim])
-            be_attack.append(aim)
-            if m_lst[aim].get_damage() > (m_lst[aim].get_health() + m_lst[aim].get_buff_health()):
-                pass #还没有写summon函数
+      #  if aim!=-1:
+        usual_minion_battle(m, m_lst[aim])
+        be_attack.append(aim)
+        if m_lst[aim].get_damage() > (m_lst[aim].get_health() + m_lst[aim].get_buff_health()):
+            pass #还没有写summon函数
     else:
         aim = select_minion(m_lst)
-        if aim!=-1:
-            usual_minion_battle(m, m_lst[aim])
-            be_attack.append(aim)
+       # if aim!=-1:
+        usual_minion_battle(m, m_lst[aim])
+        be_attack.append(aim)
     return [be_attack,id(m_lst[aim])]
 
 def after_attack(lst):
@@ -706,10 +736,16 @@ class battlefeild:
         add_minion_buff(self.down)
         for i in range(len(self.up)):
             if self.up[i].get_special() == "oldmurkeye":
-                if self.up[i].get_golden():
-                    self.up[i].set_buff([2 * (murloc_num - 1), 0])
+                if self.up[i].get_death():
+                    if self.up[i].get_golden():
+                        self.up[i].set_buff([2 * murloc_num, 0])
+                    else:
+                        self.up[i].set_buff([murloc_num, 0])
                 else:
-                    self.up[i].set_buff([murloc_num - 1, 0])
+                    if self.up[i].get_golden():
+                        self.up[i].set_buff([2 * (murloc_num-1) , 0])
+                    else:
+                        self.up[i].set_buff([murloc_num - 1, 0])
             if temp_up[i]- self.up[i].get_buff_health()>self.up[i].get_damage():
                 self.up[i].remove_damage()
             elif temp_up[i]- self.up[i].get_buff_health()>0:
@@ -718,10 +754,16 @@ class battlefeild:
                 pass
         for i in range(len(self.down)):
             if self.down[i].get_special() == "oldmurkeye":
-                if self.down[i].get_golden():
-                    self.down[i].set_buff([2 * (murloc_num - 1), 0])
+                if self.down[i].get_death():
+                    if self.down[i].get_golden():
+                        self.down[i].set_buff([2 * murloc_num, 0])
+                    else:
+                        self.down[i].set_buff([murloc_num , 0])
                 else:
-                    self.down[i].set_buff([murloc_num - 1, 0])
+                    if self.down[i].get_golden():
+                        self.down[i].set_buff([2 * (murloc_num - 1), 0])
+                    else:
+                        self.down[i].set_buff([murloc_num - 1, 0])
             if temp_down[i]- self.down[i].get_buff_health()>self.down[i].get_damage():
                 self.down[i].remove_damage()
             elif temp_down[i]- self.down[i].get_buff_health()>0:
@@ -755,8 +797,6 @@ def battle(field):
         field.dump()
         field.remove_death()
         field.renew_attack()
-
-
         print (field,"\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
     print (field.log)
