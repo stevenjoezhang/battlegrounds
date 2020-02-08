@@ -259,7 +259,7 @@ def origin_minion_buff(lst):  #所有minion_buff
 def add_minion_buff(lst):  #所有minion_buff
     minionlist=len(lst)
     for i in range(minionlist):
-        if lst[i].get_special()=="dire_worf_alpha":
+        if lst[i].get_special()=="dire_worf_alpha" and (not lst[i].get_death()):
             if minionlist==1:
                 pass
             elif i==0:
@@ -279,7 +279,7 @@ def add_minion_buff(lst):  #所有minion_buff
                 else:
                     lst[i - 1].set_buff([1, 0])
                     lst[i + 1].set_buff([1, 0])
-        elif lst[i].get_special()=="murloc_warleader":
+        elif lst[i].get_special()=="murloc_warleader" and (not lst[i].get_death()):
             for j in range(minionlist):
                 if j==i:
                     pass
@@ -289,14 +289,14 @@ def add_minion_buff(lst):  #所有minion_buff
                             lst[j].set_buff([4, 0])
                         else:
                             lst[j].set_buff([2, 0])
-        elif lst[i].get_special()=="phalanx_commander":
+        elif lst[i].get_special()=="phalanx_commander" and (not lst[i].get_death()):
             for j in range(minionlist):
                 if lst[j].get_taunt():
                     if lst[i].get_golden():
                         lst[j].set_buff([4, 0])
                     else:
                         lst[j].set_buff([2, 0])
-        elif lst[i].get_special()=="siege_breaker":
+        elif lst[i].get_special()=="siege_breaker" and (not lst[i].get_death()):
             for j in range(minionlist):
                 if j == i:
                     pass
@@ -306,7 +306,7 @@ def add_minion_buff(lst):  #所有minion_buff
                             lst[j].set_buff([2, 0])
                         else:
                             lst[j].set_buff([1, 0])
-        elif lst[i].get_special() == "malganis":
+        elif lst[i].get_special() == "malganis" and (not lst[i].get_death()):
             for j in range(minionlist):
                 if j == i:
                     pass
@@ -556,13 +556,13 @@ class battlefeild:
         origin_minion_buff(self.down)#oldmurkeye比较特殊，考虑对面,专门处理
         murloc_num=0
         for i in self.up:
-            if i.get_character()==("murloc" or "all"):
+            if i.get_character()==("murloc" or "all") :
                 murloc_num+=1
         for i in self.down:
-            if i.get_character()==("murloc" or "all"):
+            if i.get_character()==("murloc" or "all") :
                 murloc_num+=1
         for i in self.up:
-            if i.get_special() == "oldmurkeye":
+            if i.get_special() == "oldmurkeye" :
                 if i.get_golden():
                     i.set_attack(-2*(murloc_num-1))
                     i.set_buff([2*(murloc_num-1), 0])
@@ -694,12 +694,12 @@ class battlefeild:
         for i in self.up:
             temp_up.append(i.get_buff_health())
             i.remove_buff()
-            if i.get_character() == ("murloc" or "all"):
+            if i.get_character() == ("murloc" or "all") and (not i.get_death()):
                 murloc_num += 1
         for i in self.down:
             temp_down.append(i.get_buff_health())
             i.remove_buff()
-            if i.get_character() == ("murloc" or "all"):
+            if i.get_character() == ("murloc" or "all")  and (not i.get_death()):
                 murloc_num += 1
         add_minion_buff(self.up)
         add_minion_buff(self.down)
@@ -749,12 +749,13 @@ def battle(field):
             field.attack_over()
         #print (attack_list)
         #field.detect_death()
+        #field.dump()
+        field.renew_buff()
         field.remove_death()
         field.renew_attack()
-        field.renew_buff()
         field.dump()
         print (field,"\n")
-        print (field.get_already_attack()," ",field.get_attack_time())
+        #print (field.get_already_attack()," ",field.get_attack_time())
     print (field.log)
 
 '''

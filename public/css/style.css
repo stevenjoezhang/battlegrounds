@@ -67,7 +67,7 @@
 	background-position: center 5%;
 	background-size: 100%;
 	transform: translateX(-50%);
-	clip-path: ellipse(37% 47% at center);
+	clip-path: ellipse(39% 44% at 50% 45%);
 }
 .border {
 	background-image: url(/img/border.png);
@@ -95,6 +95,9 @@
 }
 .minion.trigger .trigger {
 	background-image: url(/img/trigger.png);
+}
+.minion.poison .poison {
+	background-image: url(/img/poison.png);
 }
 .minion.shield .shield {
 	background-image: url(/img/divine-shield.png);

@@ -98,6 +98,7 @@ function Minion(prop) {
 			<div class="image legendary"></div>
 			<div class="image deathrattle"></div>
 			<div class="image trigger"></div>
+			<div class="image poison"></div>
 			<div class="image atk-health"></div>
 			<div class="text attack">${this.attack}</div>
 			<div class="text health">${this.health}</div>
@@ -119,7 +120,7 @@ function Minion(prop) {
 		});
 		if (prop.taunt) this.ele.classList.add("taunt");
 		if (prop.shield) this.ele.classList.add("shield");
-		if (prop.poison) this.ele.classList.add("trigger");
+		if (prop.poison) this.ele.classList.add("poison");//trigger
 	}
 	this.initClassName();
 	this.setShield = function(state) {
@@ -130,10 +131,8 @@ function Minion(prop) {
 		this.health = health;
 		this.ele.querySelector(".text.health").innerText = this.health;
 		if (deltaHealth < 0) {
-			setTimeout(() => {
 				this.ele.classList.add("blood-splat");
 				console.log("ADD")
-			}, 0);
 			this.ele.querySelector(".text.blood-splat").innerText = deltaHealth;
 			setTimeout(() => {
 				this.ele.classList.remove("blood-splat");
@@ -184,20 +183,17 @@ function Minion(prop) {
 				z-index: 100;
 			}
 			`;
-		setTimeout(() => {
 			this.ele.classList.add(`attacking-${rid}`);
 			console.log("ATK", new Date().getSeconds(), new Date().getMilliseconds())
-		}, 0);
 		return new Promise(resolve => {
 			setTimeout(() => {
 				document.querySelector(".section-decklist").classList.add(this.belongsTo === 0 ? "shake-down" : "shake-up");
 				resolve();
+				console.log("RESOLVE", new Date().getSeconds(), new Date().getMilliseconds())
 				setTimeout(() => {
 					document.querySelector(".section-decklist").classList.remove(this.belongsTo === 0 ? "shake-down" : "shake-up");
-					setTimeout(() => {
 						this.ele.classList.remove(`attacking-${rid}`);
 						console.log("STOP", new Date().getSeconds(), new Date().getMilliseconds())
-					}, 0);
 				}, 500);
 			}, 500);
 		});
@@ -232,16 +228,6 @@ function Minion(prop) {
 		});
 	}
 }
-/*
-var queue = [
-	() => minions[0].doAttack(8),
-	[() => minions[8].setHealth(3), () => minions[0].setHealth(3)],
-	() => minions[0].doAttack(8),
-	[() => minions[8].setHealth(-4), () => minions[0].setHealth(-4)],
-	[() => minions[8].die(), () => minions[0].die()]
-];
-
-*/
 
 (async () => {
 	await initBoard();
@@ -251,7 +237,6 @@ var queue = [
 		i = Number(i);
 		let attacking = battle[1][i];
 		let result = battle[0][i + 1];
-		await minions[attacking[0]].doAttack(attacking[1]);
 		let queue = {
 			health: [],
 			die: []
@@ -277,14 +262,25 @@ var queue = [
 				}
 			}
 		}
+		await minions[attacking[0]].doAttack(attacking[1]);
+		/*
+		if (!queue.health.length) {
+			await new Promise(resolve => {
+				setTimeout(resolve, 5000);
+			});
+		}*/
 		await Promise.all(queue.health.map(ele => ele()));
 		await Promise.all(queue.die.map(ele => ele()));
-		await new Promise(resolve => {
-			setTimeout(resolve, 1000);
-		});
 	}
 })();
 /*
+var queue = [
+	() => minions[0].doAttack(8),
+	[() => minions[8].setHealth(3), () => minions[0].setHealth(3)],
+	() => minions[0].doAttack(8),
+	[() => minions[8].setHealth(-4), () => minions[0].setHealth(-4)],
+	[() => minions[8].die(), () => minions[0].die()]
+];
 async function animation(queue) {
 	for (let anim of queue) {
 		if (typeof anim === "function") {

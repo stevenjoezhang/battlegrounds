@@ -3,8 +3,9 @@ from flask import Flask, jsonify
 from multiprocessing import Process, Queue, cpu_count
 # set the project root directory as the static folder, you can set others.
 app = Flask(__name__, static_url_path='', static_folder='public')
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
-from battle import minion, battlefeild, battle
+from battles import minion, battlefeild, battle
 
 def run(queue):
     a=minion("cat",10,11,spe="the_boogeymonster",g=True,ch="murloc")
