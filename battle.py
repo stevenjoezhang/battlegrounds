@@ -24,6 +24,7 @@ class minion:
         self.golden=g
         self.death=dea
         self.special=spe #特殊描述，为一个二维元组，第一个为special_list里的，第二个为细分的list里的
+        self.rattle=False
 
     def set_attack(self,at):
         self.attack+=at
@@ -106,6 +107,14 @@ class minion:
             self.wind = w
     def get_wind(self):
         return self.wind
+
+    def set_rattle(self,ra):
+        if str(ra)== "True" or str(ra)=="False":
+            self.rattle = ra
+        else:
+            print ("error: wrong rattle set")
+    def get_rattle(self):
+        return self.rattle
 
     def set_buff(self,lst):
         if len(lst)==2:
@@ -458,7 +467,6 @@ def after_death(lst,dea):#dea为二维list，dea[0]=beast,dea[1]=mech
         else:
             pass
 
-
 class battlefeild:
     def __init__(self, up=[], down=[]):
         self.up = up #记录上方
@@ -473,6 +481,7 @@ class battlefeild:
         self.dead_minion=False
         self.deathrattle_up=[]
         self.deathrattle_down=[]
+        self.attack_flag=False
 
     def dump(self):
         self.log += self.__str__() + "\n";
@@ -492,7 +501,7 @@ class battlefeild:
                     "taunt": minion.get_taunt(),
                     "poison": minion.get_poison(),
                     "golden": minion.get_golden(),
-                    "death": minion.get_death()
+                    "death": minion.get_rattle()
                 })
         self.history.append(current)
 
@@ -505,7 +514,7 @@ class battlefeild:
         return self.dead_minion
 
     def set_now(self,num,side):
-        if num>6 or num<0:
+        if num>6 or num<-1:
             print ("error: wrong position")
         elif str(side) !="True" and str(side) !="False":
             print ("error: wrong side")
@@ -514,7 +523,6 @@ class battlefeild:
 
     def set_attack_time(self):
         if self.now[1]:
-            print (self.now)
             self.attack_time=self.up[self.now[0]].get_wind()
         else:
             self.attack_time=self.down[self.now[0]].get_wind()
@@ -546,15 +554,12 @@ class battlefeild:
 
     def up_minion(self):
         return len(self.up)
-
-    def get_up(self):
-        return self.up
-
-    def get_down(self):
-        return self.down
-
     def down_minion(self):
         return  len(self.down)
+    def get_up(self):
+        return self.up
+    def get_down(self):
+        return self.down
 
     def battle_begin(self):  #确定开始方和处理minion_buff
         minionup=len(self.up)
@@ -613,9 +618,11 @@ class battlefeild:
                 self.set_attack_time()
                 self.add_already_attack()
                 self.detect_death()
+                self.attack_flag=True
                 after_attack(self.up)
-            if self.up[pos].get_death():
-                self.attack_over()
+            if pos !=-1:
+                if self.up[pos].get_death():
+                    self.attack_over()
         else:
             if (not self.dead_minion):
                 attack_state.append(id(self.down[pos]))
@@ -624,106 +631,136 @@ class battlefeild:
                 self.set_attack_time()
                 self.add_already_attack()
                 self.detect_death()
+                self.attack_flag = True
                 after_attack(self.down)
-            if self.down[pos].get_death():
-                self.attack_over()
+            if pos!=-1:
+                if self.down[pos].get_death():
+                    self.attack_over()
+       # if attack_state:
         self.atkHistory.append(attack_state)
 
     def do_deathrattle(self):
-        for i in self.up:
-            pass
+        for i in self.deathrattle_up:
+            if i=="kaboom_bot":
+                avail = []
+                for i in range(len(self.down)):  # 不选择死亡随从为目标
+                    if (not self.down[i].get_death()):
+                        avail.append(i)
+                if avail:  # 没死光
+                    target=random.choice(avail)
+                    self.down[target].set_damage(4)
+        for i in self.deathrattle_down:
+            if i == "kaboom_bot":
+                avail = []
+                for i in range(len(self.up)):  # 不选择死亡随从为目标
+                    if (not self.up[i].get_death()):
+                        avail.append(i)
+                if avail:  # 没死光
+                    target = random.choice(avail)
+                    self.up[target].set_damage(4)
+        self.deathrattle_up=[]
+        self.deathrattle_down=[]
+
+    def find_deathrattle(self):
+        if not self.attack_flag:
+            for i in self.up:
+                if i.get_death():
+                    i.set_rattle(True)
+                    lst = i.get_special().split("+")
+                    if lst[0]== "D":
+                        for j in lst[1:]:
+                            self.deathrattle_up.append(j)
+            for i in self.down:
+                if i.get_death():
+                    i.set_rattle(True)
+                    lst = i.get_special().split("+")
+                    if lst[0] == "D":
+                        for j in lst[1:]:
+                            self.deathrattle_down.append(j)
 
     def detect_death(self):
+        Flag=True
         for i in self.up:
             if i.get_damage()>= (i.get_health()+i.get_buff_health()):
-                #print (i.get_damage(),i.get_health()+i.get_buff_health(),"up")
                 i.set_death(True)
                 self.set_dead_minion(True)
+                Flag=False
         for j in self.down:
             if j.get_damage()>= (j.get_health()+j.get_buff_health()):
-                #print (j.get_damage(),j.get_health()+j.get_buff_health(),"down")
                 j.set_death(True)
                 self.set_dead_minion(True)
+                Flag=False
+        if Flag:
+            self.set_dead_minion(False)
+
     def remove_death(self):
-        for i in self.up:
-            lst = i.get_special().split("+")
-            if lst[0]== "D":
-                for j in lst[1:]:
-                    self.deathrattle_up.append(j)
-        for i in self.down:
-            lst = i.get_special().split("+")
-            if lst[0] == "D":
-                for j in lst[1:]:
-                    self.deathrattle_down.aapend(j)
-        self.up=list(filter(lambda x: not x.get_death(), self.up))
-        self.down=list(filter(lambda x: not x.get_death(), self.down))
-        self.set_dead_minion(False)
+        self.up=list(filter(lambda x: not x.get_rattle(), self.up))
+        self.down=list(filter(lambda x: not x.get_rattle(), self.down))
 
     def summon(self,lst):
         pass
 
-    def renew_attack(self):
-        if self.attack_time>self.already_attack:#未到行动数
-            side=self.now[1]
-            if side:  #找到该谁行动，更新序号
-                num=-1
-                for i in range(len(self.up)):
-                    if self.up[i].get_move()==2:
-                        num=i
-                        break
-                if num==-1:
-                    print("error: no one attack")
-                else:
-                    self.set_now(num,side)
-            else:
-                num = -1
-                for i in range(len(self.down)):
-                    if self.down[i].get_move() == 2:
-                        num = i
-                        break
-                if num == -1:
-                    print("error: no one attack")
-                else:
-                    self.set_now(num, side)
-        else:
-            self.reset_already_attack()
-            side= not self.now[1]
-            uppos,downpos=-1,-1
-            if self.now[1]:  #移除待定替换为已动，注意有奇怪的延迟，刚行动的马上被对面移除，子产物会行动，移动待定状态会延迟一回合
-                for i in self.down:
-                    if i.get_move()==2:
-                        i.set_move(1)
-            else:
-                for i in self.up:
-                    if i.get_move()==2:
-                        i.set_move(1)
-            if side:
-                if len(self.up)!=0:
-                    for i in range(len(self.up)):
-                        if self.up[i].get_move()==0:
-                            uppos=i
-                            break
-                    if uppos==-1:
-                        uppos=0
-                        for i in self.up:
-                            i.set_move(0)
-                    self.set_now(uppos,side)
+    def renew_begin_attack(self,lst,side):
+        self.reset_already_attack()
+        if lst:
+            pos=-1
+            for i in lst:
+                if i.get_move() == 2:
+                    i.set_move(1)
+            for i in range(len(lst)):
+                if lst[i].get_move() == 0:
+                    pos = i
+                    break
+            if pos == -1:
+                pos = 0
+                for i in lst:
+                    i.set_move(0)
+            self.set_now(pos, side)
 
-                else:
-                    pass
+    def renew_attack(self):
+        side = self.now[1]
+        pos=self.now[0]
+        if pos==-1:
+            if self.attack_time > self.already_attack:  #未到行动数
+                if not self.get_dead_minion():
+                    if side:
+                        self.renew_begin_attack(self.up,side)
+                    else:
+                        self.renew_begin_attack(self.down, side)
             else:
-                if len(self.down)!=0:
-                    for j in range(len(self.down)):
-                        if self.down[j].get_move()==0:
-                            downpos=j
+                print("error: wrong renew set")
+        else:
+            if self.attack_time > self.already_attack:  # 未到行动数
+                if side:
+                    num = -1
+                    for i in range(len(self.up)):
+                        if self.up[i].get_move() == 2:
+                            num = i
                             break
-                    if downpos==-1:
-                        downpos=0
-                        for i in self.down:
-                            i.set_move(0)
-                    self.set_now(downpos, side)
+                    if num == -1:
+                        print("error: no one attack")
+                    else:
+                        self.set_now(num, side)
                 else:
-                    pass
+                    num = -1
+                    for i in range(len(self.down)):
+                        if self.down[i].get_move() == 2:
+                            num = i
+                            break
+                    if num == -1:
+                        print("error: no one attack")
+                    else:
+                        self.set_now(num, side)
+            else:
+                if self.get_dead_minion():
+                    self.reset_already_attack()
+                    self.set_now(-1,(not side))
+                else:
+                    if side:
+                        self.renew_begin_attack(self.down,False)
+                    else:
+                        self.renew_begin_attack(self.up,True)
+        self.attack_flag=False
 
     def renew_buff(self):
         temp_up=[]
@@ -791,18 +828,19 @@ class battlefeild:
 def battle(field):
     field.battle_begin()
     field.dump()
-    print (field,"\n")
+   # print (field,"\n")
     while field.up_minion()>0 and field.down_minion()>0:
         field.minion_battle()
-        #print (attack_list)
-        #field.detect_death()
-        #field.dump()
+        field.find_deathrattle()
+        field.do_deathrattle()
         field.renew_buff()
         field.dump()
         field.remove_death()
+        field.detect_death()
         #field.dump()
         field.renew_attack()
-        print (field,"\n")
+       # print ("a")
+       # print (field,"\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
     print (field.log)
 
@@ -829,4 +867,3 @@ if __name__=="__main__":
     battle(ba)
 
 '''
-
