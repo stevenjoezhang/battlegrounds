@@ -21,7 +21,7 @@ function randId(db) {
 	return target.goldenId || target.id;
 }
 async function initBoard() {
-	window.database = await fetchDB("/js/data.json");
+	window.database = await fetchDB("/data.json");
 	window.battle = await fetchDB("/battle.json");
 	function addMinion(position, index) {
 		battle[0][0][position].forEach(minion => {
@@ -54,15 +54,10 @@ function makeid(length) {
 }
 
 function Minion(prop) {
+	this.prop = prop;
 	this.ele = document.createElement("div");
-	this.ele.setAttribute("gid", prop.gid);
-	this.gid = prop.gid;
-	this.belongsTo = prop.belongsTo;
-	this.attack = prop.attack || 0;
-	this.health = prop.health || 0;
-	this.shield = prop.shield;
-	this.id = prop.id;
-	this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.id));
+	this.ele.setAttribute("gid", this.prop.gid);
+	this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.prop.id));
 	this.data = database[this.dbIndex];
 	this.dead = false;
 	this.ele.insertAdjacentHTML("afterbegin", `
@@ -74,32 +69,32 @@ function Minion(prop) {
 			<div class="image trigger"></div>
 			<div class="image poison"></div>
 			<div class="image atk-health"></div>
-			<div class="text attack">${this.attack}</div>
-			<div class="text health">${this.health}</div>
+			<div class="text attack">${this.prop.attack}</div>
+			<div class="text health">${this.prop.health}</div>
 			<div class="image shield"></div>
 			<div class="image shield"></div>
 			<div class="image blood-splat">
 				<div class="text blood-splat"></div>
 			</div>`);
-	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.id}.jpg)`;
-	document.querySelectorAll(`.minions`)[this.belongsTo].appendChild(this.ele);
+	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.prop.id}.jpg)`;
+	document.querySelectorAll(`.minions`)[this.prop.belongsTo].appendChild(this.ele);
 	this.initClassName = function() {
 		this.ele.classList.add("minion");
-		//if (this.data.goldenId === this.id) this.ele.classList.add("golden");
-		if (prop.golden) this.ele.classList.add("golden");
+		//if (this.data.goldenId === this.prop.id) this.ele.classList.add("golden");
+		if (this.prop.golden) this.ele.classList.add("golden");
 		if (this.data.divineShield) this.ele.classList.add("shield");
 		if (this.data.cleave) this.ele.classList.add("trigger");
 		["legendary", "taunt", "poisonous", "windfury", "deathrattle", "shield"].forEach(item => {
 			if (this.data[item]) this.ele.classList.add(item);
 		});
-		if (prop.taunt) this.ele.classList.add("taunt");
-		if (prop.shield) this.ele.classList.add("shield");//this.shield
-		if (prop.poison) this.ele.classList.add("poison");//trigger
+		if (this.prop.taunt) this.ele.classList.add("taunt");
+		if (this.prop.shield) this.ele.classList.add("shield");//this.prop.shield
+		if (this.prop.poison) this.ele.classList.add("poison");//trigger
 	}
 	this.initClassName();
 	this.setShield = function(state) {
-		if (this.shield === state) return;
-		this.shield = state;
+		if (this.prop.shield === state) return;
+		this.prop.shield = state;
 		if (state) this.ele.classList.add("shield");
 		else {
 			this.ele.classList.add("lose-shield");
@@ -110,9 +105,9 @@ function Minion(prop) {
 		}
 	}
 	this.setHealth = function(health) {
-		let deltaHealth = health - this.health;
-		this.health = health;
-		this.ele.querySelector(".text.health").innerText = this.health;
+		let deltaHealth = health - this.prop.health;
+		this.prop.health = health;
+		this.ele.querySelector(".text.health").innerText = this.prop.health;
 		if (deltaHealth < 0) {
 			return this.splat(deltaHealth);
 		}
@@ -130,8 +125,8 @@ function Minion(prop) {
 		});
 	}
 	this.setAttack = function(attack) {
-		this.attack = attack;
-		this.ele.querySelector(".text.attack").innerText = this.attack;
+		this.prop.attack = attack;
+		this.ele.querySelector(".text.attack").innerText = this.prop.attack;
 	}
 	this.doAttack = function(target) {
 		if (this.dead) return;
@@ -140,8 +135,8 @@ function Minion(prop) {
 		let deltaY = targetEle.getBoundingClientRect().y - this.ele.getBoundingClientRect().y;
 		//deltaX > 0 ? deltaX -= this.ele.offsetWidth / 3 : deltaX += this.ele.offsetWidth / 3;
 		//deltaY > 0 ? deltaY -= this.ele.offsetHeight / 3 : deltaY += this.ele.offsetHeight / 3;
-		document.querySelectorAll(".minions")[this.belongsTo].style.cssText = "z-index: 100;";
-		document.querySelectorAll(".minions")[1 - this.belongsTo].style.cssText = "z-index: 0;";
+		document.querySelectorAll(".minions")[this.prop.belongsTo].style.cssText = "z-index: 100;";
+		document.querySelectorAll(".minions")[1 - this.prop.belongsTo].style.cssText = "z-index: 0;";
 		console.log("STYLE", new Date().getSeconds(), new Date().getMilliseconds())
 		let rid = makeid(8);
 		document.getElementById("attack-style").innerHTML += `@keyframes attacking-${rid} {
@@ -173,11 +168,11 @@ function Minion(prop) {
 		console.log("ATK", new Date().getSeconds(), new Date().getMilliseconds())
 		return new Promise(resolve => {
 			setTimeout(() => {
-				document.querySelector(".section-decklist").classList.add(this.belongsTo === 0 ? "shake-down" : "shake-up");
+				document.querySelector(".section-decklist").classList.add(this.prop.belongsTo === 0 ? "shake-down" : "shake-up");
 				resolve();
 				console.log("RESOLVE", new Date().getSeconds(), new Date().getMilliseconds())
 				setTimeout(() => {
-					document.querySelector(".section-decklist").classList.remove(this.belongsTo === 0 ? "shake-down" : "shake-up");
+					document.querySelector(".section-decklist").classList.remove(this.prop.belongsTo === 0 ? "shake-down" : "shake-up");
 					this.ele.classList.remove(`attacking-${rid}`);
 					console.log("STOP", new Date().getSeconds(), new Date().getMilliseconds())
 				}, 500);
@@ -231,9 +226,9 @@ function Minion(prop) {
 			let minion = minions[i];
 			if (minion.dead) continue;
 			let downIndex = result.down.findIndex(ele => {
-				return ele.id === minion.gid;
+				return ele.id === minion.prop.gid;
 			});
-			let upIndex = result.up.findIndex(ele => ele.id === minion.gid);
+			let upIndex = result.up.findIndex(ele => ele.id === minion.prop.gid);
 			//console.log(downIndex, upIndex);
 			if (downIndex === -1 && upIndex === -1) queue.die.push(() => minion.die());//可以移除
 			else {

@@ -67,6 +67,7 @@
 	background-position: center 5%;
 	background-size: 100%;
 	transform: translateX(-50%);
+	-webkit-clip-path: ellipse(39% 44% at 50% 45%);
 	clip-path: ellipse(39% 44% at 50% 45%);
 }
 .border {

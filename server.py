@@ -29,12 +29,21 @@ def run(queue):
     battle(ba)
     queue.put([ba.history,ba.atkHistory,ba.log])
 
+import codecs, json
+
+with codecs.open('data.json', encoding='utf8') as f:
+  database = json.load(f)
+
 @app.route('/')
 def root():
     return app.send_static_file('index.html')
 
-@app.route('/battle.json')
+@app.route('/data.json')
 def data():
+    return jsonify(database)
+
+@app.route('/battle.json')
+def battledata():
     q = Queue()
     spawn = Process(target = run, args = (q,))
     spawn.start()
