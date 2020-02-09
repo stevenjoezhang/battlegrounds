@@ -248,7 +248,7 @@ function Minion(prop) {
 				}
 			}
 		}
-		await minions[attacking[0]].doAttack(attacking[1]);
+		if (attacking.length === 2) await minions[attacking[0]].doAttack(attacking[1]);
 		/*
 		if (!queue.health.length) {
 			await new Promise(resolve => {
