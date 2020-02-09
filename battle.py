@@ -29,13 +29,11 @@ class minion:
         self.attack+=at
         if self.attack<=0:
             print ("error: wrong set attack")
-
     def get_attack(self):
         return self.attack
 
     def set_name(self,na):
         self.name=na
-
     def get_name(self):
         return self.name
 
@@ -43,16 +41,13 @@ class minion:
         self.health+=he
         if self.health <=0:
             print ("error: wrong set health")
-
     def get_health(self):
         return self.health
 
     def set_damage(self, da):
         self.damage+=da
-
     def remove_damage(self):
         self.damage=0
-
     def get_damage(self):
         return self.damage
 
@@ -61,7 +56,6 @@ class minion:
             print ("error: wrong state")
         else:
             self.move=mo
-
     def get_move(self):
         return self.move
 
@@ -70,7 +64,6 @@ class minion:
             self.character = ch
         else:
             print ("error: wrong character set")
-
     def get_character(self):
         return self.character
 
@@ -79,7 +72,6 @@ class minion:
             self.shield = sh
         else:
             print ("error: wrong shield set")
-
     def get_shield(self):
         return self.shield
 
@@ -88,7 +80,6 @@ class minion:
             self.golden = go
         else:
             print ("error: wrong golden set")
-
     def get_golden(self):
         return self.golden
 
@@ -97,7 +88,6 @@ class minion:
             self.taunt = t
         else:
             print ("error: wrong taunt set")
-
     def get_taunt(self):
         return self.taunt
 
@@ -106,7 +96,6 @@ class minion:
             self.poison = p
         else:
             print ("error: wrong poison set")
-
     def get_poison(self):
         return self.poison
 
@@ -115,7 +104,6 @@ class minion:
             print ("error: wrong wind set")
         else:
             self.wind = w
-
     def get_wind(self):
         return self.wind
 
@@ -125,13 +113,10 @@ class minion:
             self.buff[1]+=lst[1]
         else:
             print ("error: wrong buff set")
-
     def get_buff_attack(self):
         return self.buff[0]
-
     def get_buff_health(self):
         return self.buff[1]
-
     def remove_buff(self):
         self.buff=[0,0]
 
@@ -140,7 +125,6 @@ class minion:
             self.death = dea
         else:
             print ("error: wrong death set")
-
     def get_death(self):
         return self.death
 
@@ -149,13 +133,11 @@ class minion:
             self.special=sp
         else:
             print ("error: wrong special set")
-
     def get_special(self):
         return self.special
 
     def get_calculated_health(self):
         return self.health+self.buff[1]-self.damage
-
     def get_calculated_attack(self):
         return self.attack + self.buff[0]
 
@@ -166,7 +148,8 @@ class minion:
           if self.shield:
               self.set_shield(False)
           elif other.poison:
-              self.set_damage(10000) #poison is 10000 attack
+              self.set_damage(other.attack + other.buff[0])
+              self.set_death(True)
           else:
               self.set_damage(other.attack+other.buff[0])
              # print (self.damage)
@@ -486,7 +469,7 @@ class battlefeild:
         self.atkHistory = []
         self.log = ""
         self.attack_time=1
-        self.already_attack=1
+        self.already_attack=0
 
     def dump(self):
         self.log += self.__str__() + "\n";
@@ -528,7 +511,7 @@ class battlefeild:
         return self.attack_time
 
     def reset_already_attack(self):
-        self.already_attack=1
+        self.already_attack=0
     def add_already_attack(self):
         self.already_attack+=1
     def get_already_attack(self):
@@ -568,21 +551,17 @@ class battlefeild:
         if minionup> miniondown:
             #self.begin=True
             self.set_now(0,True)
-            self.set_attack_time()
         elif minionup< miniondown:
             #self.begin=False
             self.set_now(0, False)
-            self.set_attack_time()
         else:
             a=random.random()
             if a>=0.5:
                # self.begin = True
                 self.set_now(0, True)
-                self.set_attack_time()
             else:
                 #self.begin =False
                 self.set_now(0,False)
-                self.set_attack_time()
         origin_minion_buff(self.up)
         origin_minion_buff(self.down)#oldmurkeye比较特殊，考虑对面,专门处理
         murloc_num=0
@@ -622,17 +601,23 @@ class battlefeild:
             attack_state.append(id(self.up[pos]))
             temp=single_minion_battle(self.up[pos],self.down)
             attack_state.append(temp[1])
+            self.set_attack_time()
+            self.add_already_attack()
             self.detect_death()
             after_attack(self.up)
-            attack_state.append(self.up[pos].get_death())
+            if self.up[pos].get_death():
+                self.attack_over()
         else:
             attack_state.append(id(self.down[pos]))
             temp=single_minion_battle(self.down[pos], self.up)
             attack_state.append(temp[1])
+            self.set_attack_time()
+            self.add_already_attack()
             self.detect_death()
             after_attack(self.down)
-            attack_state.append(self.down[pos].get_death())
-        return attack_state
+            if self.down[pos].get_death():
+                self.attack_over()
+        self.atkHistory.append(attack_state)
 
 
     def detect_death(self):
@@ -665,7 +650,6 @@ class battlefeild:
                     print("error: no one attack")
                 else:
                     self.set_now(num,side)
-                    self.add_already_attack()
             else:
                 num = -1
                 for i in range(len(self.down)):
@@ -676,7 +660,6 @@ class battlefeild:
                     print("error: no one attack")
                 else:
                     self.set_now(num, side)
-                    self.add_already_attack()
         else:
             self.reset_already_attack()
             side= not self.now[1]
@@ -700,7 +683,7 @@ class battlefeild:
                         for i in self.up:
                             i.set_move(0)
                     self.set_now(uppos,side)
-                    self.set_attack_time()
+
                 else:
                     pass
             else:
@@ -714,7 +697,6 @@ class battlefeild:
                         for i in self.down:
                             i.set_move(0)
                     self.set_now(downpos, side)
-                    self.set_attack_time()
                 else:
                     pass
 
@@ -786,10 +768,7 @@ def battle(field):
     field.dump()
     print (field,"\n")
     while field.up_minion()>0 and field.down_minion()>0:
-        attack_list=field.minion_battle()
-        field.atkHistory.append(attack_list[0:2])
-        if attack_list[2]:
-            field.attack_over()
+        field.minion_battle()
         #print (attack_list)
         #field.detect_death()
         #field.dump()
