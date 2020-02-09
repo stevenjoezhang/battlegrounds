@@ -457,12 +457,12 @@ def after_death(lst,dea):#dea为二维list，dea[0]=beast,dea[1]=mech
                 i.set_attack(2*dea[1])
         else:
             pass
+
+
 class battlefeild:
-    def __init__(self, up=[], down=[],upa=[],downa=[]):
+    def __init__(self, up=[], down=[]):
         self.up = up #记录上方
         self.down = down #记录下方
-        self.up_after_attack=upa
-        self.down_after_attack=downa
         #self.begin=None #True 表示上面先动
         self.now =None  #表示运行到第几个,第一表示该第几个，第二表示示该上方或下方,True 表示上方
         self.history = []
@@ -470,6 +470,9 @@ class battlefeild:
         self.log = ""
         self.attack_time=1
         self.already_attack=0
+        self.dead_minion=False
+        self.deathrattle_up=[]
+        self.deathrattle_down=[]
 
     def dump(self):
         self.log += self.__str__() + "\n";
@@ -492,6 +495,14 @@ class battlefeild:
                     "death": minion.get_death()
                 })
         self.history.append(current)
+
+    def set_dead_minion(self,de):
+       if str(de) !="True" and str(de) !="False":
+            print ("error: wrong set dead minion")
+       else:
+        self.dead_minion=de
+    def get_dead_minion(self):
+        return self.dead_minion
 
     def set_now(self,num,side):
         if num>6 or num<0:
@@ -588,9 +599,6 @@ class battlefeild:
                     i.set_attack(-(murloc_num-1))
                     i.set_buff([murloc_num-1, 0])
 
-    #self.up_after_attack = copy(self.up)
-    #self.down_after_attack = copy(self.down)
-
     def minion_battle(self):
         side = self.now[1]
         pos=self.now[0]
@@ -598,41 +606,58 @@ class battlefeild:
         if  str(side) !="True" and str(side) !="False":
             print ("error: which side to attack")
         elif side:
-            attack_state.append(id(self.up[pos]))
-            temp=single_minion_battle(self.up[pos],self.down)
-            attack_state.append(temp[1])
-            self.set_attack_time()
-            self.add_already_attack()
-            self.detect_death()
-            after_attack(self.up)
+            if (not self.dead_minion):
+                attack_state.append(id(self.up[pos]))
+                temp=single_minion_battle(self.up[pos],self.down)
+                attack_state.append(temp[1])
+                self.set_attack_time()
+                self.add_already_attack()
+                self.detect_death()
+                after_attack(self.up)
             if self.up[pos].get_death():
                 self.attack_over()
         else:
-            attack_state.append(id(self.down[pos]))
-            temp=single_minion_battle(self.down[pos], self.up)
-            attack_state.append(temp[1])
-            self.set_attack_time()
-            self.add_already_attack()
-            self.detect_death()
-            after_attack(self.down)
+            if (not self.dead_minion):
+                attack_state.append(id(self.down[pos]))
+                temp=single_minion_battle(self.down[pos], self.up)
+                attack_state.append(temp[1])
+                self.set_attack_time()
+                self.add_already_attack()
+                self.detect_death()
+                after_attack(self.down)
             if self.down[pos].get_death():
                 self.attack_over()
         self.atkHistory.append(attack_state)
 
+    def do_deathrattle(self):
+        for i in self.up:
+            pass
 
     def detect_death(self):
         for i in self.up:
             if i.get_damage()>= (i.get_health()+i.get_buff_health()):
                 #print (i.get_damage(),i.get_health()+i.get_buff_health(),"up")
                 i.set_death(True)
+                self.set_dead_minion(True)
         for j in self.down:
             if j.get_damage()>= (j.get_health()+j.get_buff_health()):
                 #print (j.get_damage(),j.get_health()+j.get_buff_health(),"down")
                 j.set_death(True)
-
+                self.set_dead_minion(True)
     def remove_death(self):
+        for i in self.up:
+            lst = i.get_special().split("+")
+            if lst[0]== "D":
+                for j in lst[1:]:
+                    self.deathrattle_up.append(j)
+        for i in self.down:
+            lst = i.get_special().split("+")
+            if lst[0] == "D":
+                for j in lst[1:]:
+                    self.deathrattle_down.aapend(j)
         self.up=list(filter(lambda x: not x.get_death(), self.up))
         self.down=list(filter(lambda x: not x.get_death(), self.down))
+        self.set_dead_minion(False)
 
     def summon(self,lst):
         pass
@@ -775,6 +800,7 @@ def battle(field):
         field.renew_buff()
         field.dump()
         field.remove_death()
+        #field.dump()
         field.renew_attack()
         print (field,"\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
@@ -802,8 +828,5 @@ if __name__=="__main__":
     ba.add_minion(g,"down",0)
     battle(ba)
 
-
-lst=[0,2,3]
-lst.insert(6,'x')
-print (lst,len(lst))
 '''
+
