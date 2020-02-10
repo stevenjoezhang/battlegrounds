@@ -14,6 +14,14 @@ def simple_test2():
     ba.add_minion(a, "down", 0)
     return ba
 
+def mimi_test():
+    a=minion("b", 2, 6, ch="mech", spe="D+kaboom_bot")
+    b=minion("b", 6, 10, ch="mech", spe="D+kaboom_bot")
+    ba = battlefeild()
+    ba.add_minion(b, "up", 0)
+    ba.add_minion(a, "down", 0)
+    return ba
+
 def test1():
     a = minion("a", 6, 16, spe="foe_reaper_4000", g=True, ch="mech")
     b = minion("b", 6, 10, ch="mech", spe="D+kaboom_bot")

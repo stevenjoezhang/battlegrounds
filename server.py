@@ -9,7 +9,7 @@ from battle import minion, battlefeild, battle
 import test
 
 def run(queue):
-    ba=test.simple_test2()
+    ba=test.test1()
     battle(ba)
     queue.put([ba.history,ba.atkHistory,ba.log])
 
@@ -32,6 +32,7 @@ def battledata():
     spawn = Process(target = run, args = (q,))
     spawn.start()
     t = q.get()
+    t.append(0)
     #print(len(t[0]), len(t[1]))
     spawn.join()
     return jsonify(t)
