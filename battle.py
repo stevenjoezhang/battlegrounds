@@ -2,7 +2,7 @@ import random
 ch_list=("beast","murloc","mech","demon","all")
 special_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye",\
               "zapp_slywick","foe_reaper_4000","cave_hydra","ironhide_direhorn","the_boogeymonster",\
-              "festeroot_hulk","scavenging_hyena","junkbot", "soul_juggler")
+              "festeroot_hulk","scavenging_hyena","junkbot", "soul_juggler","kaboom_bot")
 #m_b_list=("dire_worf_alpha","murloc_warleader","phalanx_commander","siege_breaker","malganis","oldmurkeye")
 #d_s_list=("Mecharoo","")
 
@@ -414,7 +414,7 @@ def single_minion_battle(m,m_lst):
             be_attack.append(aim)
             be_attack.append(aim-1)
             be_attack.append(aim+1)
-            m.set_move(2)
+        m.set_move(2)
     elif m.get_special() == "the_boogeymonster":
         aim = select_minion(m_lst)
        # if aim!=-1:
@@ -545,7 +545,7 @@ class battlefeild:
             else:
                 print ("error: wrong position to add a minion1")
         elif side=="down":
-            if pos>=0 and len(self.up)+1 <= 7:
+            if pos>=0 and len(self.down)+1 <= 7:
                 self.down.insert(pos,mi)  #这里注意如果列表只有4个minion，直接插入第六个会使其变成第五而不是第六
             else:
                 print ("error: wrong position to add a minion2")
@@ -608,35 +608,35 @@ class battlefeild:
         side = self.now[1]
         pos=self.now[0]
         attack_state=[]
-        if  str(side) !="True" and str(side) !="False":
-            print ("error: which side to attack")
-        elif side:
-            if (not self.dead_minion):
-                attack_state.append(id(self.up[pos]))
-                temp=single_minion_battle(self.up[pos],self.down)
-                attack_state.append(temp[1])
-                self.set_attack_time()
-                self.add_already_attack()
-                self.detect_death()
-                self.attack_flag=True
-                after_attack(self.up)
-            if pos !=-1:
-                if self.up[pos].get_death():
-                    self.attack_over()
-        else:
-            if (not self.dead_minion):
-                attack_state.append(id(self.down[pos]))
-                temp=single_minion_battle(self.down[pos], self.up)
-                attack_state.append(temp[1])
-                self.set_attack_time()
-                self.add_already_attack()
-                self.detect_death()
-                self.attack_flag = True
-                after_attack(self.down)
-            if pos!=-1:
-                if self.down[pos].get_death():
-                    self.attack_over()
-       # if attack_state:
+        if self.up and self.down:
+            if  str(side) !="True" and str(side) !="False":
+                print ("error: which side to attack")
+            elif side:
+                if (not self.dead_minion):
+                    temp = single_minion_battle(self.up[pos], self.down)
+                    attack_state.append(id(self.up[pos]))
+                    attack_state.append(temp[1])
+                    self.set_attack_time()
+                    self.add_already_attack()
+                    self.detect_death()
+                    self.attack_flag=True
+                    after_attack(self.up)
+                if pos !=-1:
+                    if self.up[pos].get_death():
+                        self.attack_over()
+            else:
+                if (not self.dead_minion) and self.down:
+                    attack_state.append(id(self.down[pos]))
+                    temp=single_minion_battle(self.down[pos], self.up)
+                    attack_state.append(temp[1])
+                    self.set_attack_time()
+                    self.add_already_attack()
+                    self.detect_death()
+                    self.attack_flag = True
+                    after_attack(self.down)
+                if pos!=-1:
+                    if self.down[pos].get_death():
+                        self.attack_over()
         self.atkHistory.append(attack_state)
 
     def do_deathrattle(self):
@@ -648,7 +648,10 @@ class battlefeild:
                         avail.append(i)
                 if avail:  # 没死光
                     target=random.choice(avail)
-                    self.down[target].set_damage(4)
+                    if self.down[target].get_shield():
+                        self.down[target].set_shield(False)
+                    else:
+                        self.down[target].set_damage(4)
         for i in self.deathrattle_down:
             if i == "kaboom_bot":
                 avail = []
@@ -657,7 +660,10 @@ class battlefeild:
                         avail.append(i)
                 if avail:  # 没死光
                     target = random.choice(avail)
-                    self.up[target].set_damage(4)
+                    if self.up[target].get_shield():
+                        self.up[target].set_shield(False)
+                    else:
+                        self.up[target].set_damage(4)
         self.deathrattle_up=[]
         self.deathrattle_down=[]
 
@@ -829,7 +835,7 @@ def battle(field):
     field.battle_begin()
     field.dump()
    # print (field,"\n")
-    while field.up_minion()>0 and field.down_minion()>0:
+    while True :
         field.minion_battle()
         field.find_deathrattle()
         field.do_deathrattle()
@@ -839,10 +845,12 @@ def battle(field):
         field.detect_death()
         #field.dump()
         field.renew_attack()
+        if (field.up_minion()==0 or field.down_minion()==0) and (not field.get_dead_minion()):
+            break
        # print ("a")
        # print (field,"\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
-    print (field.log)
+   # print (field.log)
 
 '''
 if __name__=="__main__":

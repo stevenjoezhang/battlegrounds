@@ -6,26 +6,10 @@ app = Flask(__name__, static_url_path='', static_folder='public')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 from battle import minion, battlefeild, battle
+import test
 
 def run(queue):
-    a=minion("cat",10,11,spe="the_boogeymonster",g=True,ch="murloc")
-    b=minion("dog",3,12,p=True,ch="murloc")
-    c=minion("cat",10,11,ch="murloc")
-    d=minion("cat",10,11,ch="murloc")
-    e=minion("cat",10,11,ch="murloc")
-    f=minion("cat",10,11,ch="murloc",spe="oldmurkeye")
-    g=minion("test",1,3,sh=True,t=True,ch="murloc")
-    #a.minion_attack(b)
-    #a.minion_attack(b)
-    #a.set_attack(2)
-    ba=battlefeild()
-    ba.add_minion(a,"up",0)
-    ba.add_minion(c,"up",1)
-    ba.add_minion(e,"up",2)
-    ba.add_minion(b,"down",0)
-    ba.add_minion(d,"down",0)
-    ba.add_minion(f,"down",0)
-    ba.add_minion(g,"down",0)
+    ba=test.simple_test2()
     battle(ba)
     queue.put([ba.history,ba.atkHistory,ba.log])
 
