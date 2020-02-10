@@ -31,7 +31,7 @@ async function initBoard() {
 				belongsTo: index,
 				id: "TB_BaconUps_038",//randId(database),//"TB_BaconUps_080",
 				gid: minion.id,
-				poison: minion.poison,
+				poisonous: minion.poison,
 				shield: minion.shield,
 				taunt: minion.taunt,
 				golden: minion.golden
@@ -72,10 +72,7 @@ function Minion(prop) {
 			<div class="text attack">${this.prop.attack}</div>
 			<div class="text health">${this.prop.health}</div>
 			<div class="image shield"></div>
-			<div class="image shield"></div>
-			<div class="image blood-splat">
-				<div class="text blood-splat"></div>
-			</div>`);
+			<div class="image shield"></div>`);
 	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.prop.id}.jpg)`;
 	document.querySelectorAll(`.minions`)[this.prop.belongsTo].appendChild(this.ele);
 	this.initClassName = function() {
@@ -85,11 +82,8 @@ function Minion(prop) {
 		if (this.data.divineShield) this.ele.classList.add("shield");
 		if (this.data.cleave) this.ele.classList.add("trigger");
 		["legendary", "taunt", "poisonous", "windfury", "deathrattle", "shield"].forEach(item => {
-			if (this.data[item]) this.ele.classList.add(item);
+			if (this.data[item] || this.prop[item]) this.ele.classList.add(item);
 		});
-		if (this.prop.taunt) this.ele.classList.add("taunt");
-		if (this.prop.shield) this.ele.classList.add("shield");//this.prop.shield
-		if (this.prop.poison) this.ele.classList.add("poison");//trigger
 	}
 	this.initClassName();
 	this.setShield = function(state) {
@@ -113,15 +107,15 @@ function Minion(prop) {
 		}
 	}
 	this.splat = function(value) {
-		this.ele.classList.add("blood-splat");
-		console.log("ADD")
-		this.ele.querySelector(".text.blood-splat").innerText = value;
+		var animEle = document.createElement("div");
+		animEle.classList.add("image", "blood-splat");
+		animEle.innerHTML = `<div class="text blood-splat">${value}</div>`;
+		this.ele.appendChild(animEle);
 		setTimeout(() => {
-			this.ele.classList.remove("blood-splat");
-			console.log("RM")
+			this.ele.removeChild(animEle);
 		}, 2900);
 		return new Promise(resolve => {
-			setTimeout(resolve, 2500);
+			setTimeout(resolve, 1500);
 		});
 	}
 	this.setAttack = function(attack) {
@@ -179,9 +173,9 @@ function Minion(prop) {
 			}, 500);
 		});
 	}
-	this.createDeathRattleAnim = function() {
+	this.createOverlayAnim = function(className) {
 		var animEle = document.createElement("div");
-		animEle.classList.add("deathrattle-die");
+		animEle.classList.add("overlay", className);
 		animEle.style.left = this.ele.getBoundingClientRect().left + this.ele.offsetWidth / 2 + "px";
 		animEle.style.bottom = window.innerHeight - this.ele.getBoundingClientRect().bottom + "px";
 		animEle.style.width = this.ele.offsetWidth + "px";
@@ -192,20 +186,20 @@ function Minion(prop) {
 		if (this.dead) return;
 		this.dead = true;
 		if (this.data.deathrattle) {
-			var animEle = this.createDeathRattleAnim();
+			var animEle = this.createOverlayAnim("deathrattle-die");
 		}
 		this.ele.classList.add("dying");
+		setTimeout(() => {
+			if (animEle) {
+				document.body.appendChild(animEle);
+				setTimeout(() => {
+					document.body.removeChild(animEle);
+				}, 4000);
+			}
+			this.ele.parentNode.removeChild(this.ele);
+		}, 1500);
 		return new Promise(resolve => {
-			setTimeout(() => {
-				if (animEle) {
-					document.body.appendChild(animEle);
-					setTimeout(() => {
-						document.body.removeChild(animEle);
-					}, 4000);
-				}
-				this.ele.parentNode.removeChild(this.ele);
-				resolve();
-			}, 1500);
+			setTimeout(resolve, 500);
 		});
 	}
 }
