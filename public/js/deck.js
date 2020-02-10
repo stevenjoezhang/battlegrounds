@@ -103,6 +103,10 @@ function Minion(prop) {
 		this.prop.health = health;
 		this.ele.querySelector(".text.health").innerText = this.prop.health;
 		if (deltaHealth < 0) {
+			this.ele.querySelector(".health").classList.add("text-splat");
+			setTimeout(() => {
+				this.ele.querySelector(".health").classList.remove("text-splat");
+			}, 1000)
 			return this.splat(deltaHealth);
 		}
 	}
@@ -243,12 +247,11 @@ function Minion(prop) {
 			}
 		}
 		if (attacking.length === 2) await minions[attacking[0]].doAttack(attacking[1]);
-		/*
-		if (!queue.health.length) {
+		if (typeof battle[3] === "number") {
 			await new Promise(resolve => {
-				setTimeout(resolve, 5000);
+				setTimeout(resolve, battle[3]);
 			});
-		}*/
+		}
 		await Promise.all(queue.health.map(ele => ele()));
 		await Promise.all(queue.die.map(ele => ele()));
 	}

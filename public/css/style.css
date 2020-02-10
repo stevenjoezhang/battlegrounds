@@ -125,6 +125,26 @@
 		opacity: 0;
 	}
 }
+@keyframes text-splat {
+	0% {
+		transform: translateX(50%) scale(1);
+	}
+	20% {
+		transform: translateX(50%) scale(2);
+	}
+	40% {
+		transform: translateX(50%) scale(0.5);
+	}
+	60% {
+		transform: translateX(50%) scale(1.2);
+	}
+	80% {
+		transform: translateX(50%) scale(0.9);
+	}
+	100% {
+		transform: translateX(50%) scale(1);
+	}
+}
 @keyframes splat {
 	0% {
 		transform: translateX(-50%) scale(0);
@@ -208,6 +228,9 @@
 	right: 23%;
 	transform: translateX(50%);
 }
+.text.health.text-splat {
+	animation: text-splat 1s;
+}
 
 .overlay {
 	position: fixed;
@@ -244,4 +267,5 @@
 	font-size: large;
 	overflow: scroll;
 	z-index: 200;
+	font-family: monospace;
 }
