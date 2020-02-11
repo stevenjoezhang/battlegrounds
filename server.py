@@ -32,7 +32,7 @@ def battledata():
     spawn = Process(target = run, args = (q,))
     spawn.start()
     t = q.get()
-    t.append(0)
+    t.append(1000)
     #print(len(t[0]), len(t[1]))
     spawn.join()
     return jsonify(t)
