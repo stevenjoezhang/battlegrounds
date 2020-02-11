@@ -23,13 +23,15 @@ function randId(db) {
 async function initBoard() {
 	window.database = await fetchDB("/data.json");
 	window.battle = await fetchDB("/battle.json");
-	function addMinion(position, index) {
+	function addMinion(position, positionIndex) {
 		battle[0][0][position].forEach(minion => {
+			let index = database.findIndex(item => minion.name.toLowerCase() === item.name.toLowerCase());
+			let id = (index !== -1) ? ((minion.golden && database[index].goldenId) ? database[index].goldenId : database[index].id) : "TB_BaconUps_038";
 			let prop = {
 				attack: minion.atk,
 				health: minion.health,
-				belongsTo: index,
-				id: "TB_BaconUps_038",//randId(database),//"TB_BaconUps_080",
+				belongsTo: positionIndex,
+				id,//randId(database),//"TB_BaconUps_080",
 				gid: minion.id,
 				poisonous: minion.poison,
 				shield: minion.shield,

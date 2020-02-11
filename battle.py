@@ -521,7 +521,8 @@ class battlefeild:
                     "taunt": minion.get_taunt(),
                     "poison": minion.get_poison(),
                     "golden": minion.get_golden(),
-                    "death": minion.get_rattle()
+                    "death": minion.get_rattle(),
+                    "name": minion.get_name()
                 })
         self.history.append(current)
 
