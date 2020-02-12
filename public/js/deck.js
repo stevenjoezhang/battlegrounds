@@ -33,7 +33,7 @@ async function initBoard() {
 	window.database = await fetchDB("/data.json");
 	window.battle = await fetchDB("/battle.json");
 	let board = ["up", "down"];
-	[0, 1].forEach(index => battle[0][0][board[index]].forEach(minion => minions[minion.id] = new Minion(minion, index)));
+	[0, 1].forEach(index => battle[0][0][board[index]].forEach(prop => minions[prop.id] = new Minion(prop, index)));
 }
 
 function makeid(length) {
@@ -59,6 +59,7 @@ function Minion(prop, belongsTo) {
 		shield: prop.shield,
 		taunt: prop.taunt,
 		golden: prop.golden,
+		source: prop.source,
 		position: null
 	};
 	this.ele = document.createElement("div");
@@ -84,8 +85,16 @@ function Minion(prop, belongsTo) {
 	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.prop.id}.jpg)`;
 	if (this.prop.position) document.querySelectorAll(`.minions`)[this.prop.belongsTo].children[this.prop.position].after(this.ele);
 	else document.querySelectorAll(`.minions`)[this.prop.belongsTo].appendChild(this.ele);
+	this.animationTimer = function(target, className) {
+		target.classList.add(className);
+		let listener = target.addEventListener("animationend", () => {
+			target.classList.remove(className);
+			target.removeEventListener("animationend", listener);
+		});
+	}
 	this.initClassName = function() {
 		this.ele.classList.add("minion");
+		this.animationTimer(this.ele, "approach")
 		//if (this.data.goldenId === this.prop.id) this.ele.classList.add("golden");
 		if (this.prop.golden) this.ele.classList.add("golden");
 		if (this.data.divineShield) this.ele.classList.add("shield");
@@ -100,10 +109,8 @@ function Minion(prop, belongsTo) {
 		this.prop.shield = state;
 		if (state) this.ele.classList.add("shield");
 		else {
-			this.ele.classList.add("lose-shield");
-			setTimeout(() => {
-				this.ele.classList.remove("shield", "lose-shield");
-			}, 2000);
+			this.ele.classList.remove("shield");
+			this.animationTimer(this.ele, "lose-shield");
 			return this.splat("-0");
 		}
 	}
@@ -112,10 +119,7 @@ function Minion(prop, belongsTo) {
 		this.prop.health = health;
 		this.ele.querySelector(".text.health").innerText = this.prop.health;
 		if (deltaHealth < 0) {
-			this.ele.querySelector(".health").classList.add("text-splat");
-			setTimeout(() => {
-				this.ele.querySelector(".health").classList.remove("text-splat");
-			}, 1000)
+			this.animationTimer(this.ele.querySelector(".health"), "text-splat");
 			return this.splat(deltaHealth);
 		}
 	}
@@ -171,16 +175,14 @@ function Minion(prop, belongsTo) {
 				z-index: 100;
 			}
 			`;
-		this.ele.classList.add(`attacking-${rid}`);
+		this.animationTimer(this.ele, `attacking-${rid}`);
 		console.log("ATK", new Date().getSeconds(), new Date().getMilliseconds())
 		return new Promise(resolve => {
 			setTimeout(() => {
-				document.querySelector(".section-decklist").classList.add(this.prop.belongsTo === 0 ? "shake-down" : "shake-up");
+				this.animationTimer(document.querySelector(".section-decklist"), this.prop.belongsTo === 0 ? "shake-down" : "shake-up");
 				resolve();
 				console.log("RESOLVE", new Date().getSeconds(), new Date().getMilliseconds())
 				setTimeout(() => {
-					document.querySelector(".section-decklist").classList.remove(this.prop.belongsTo === 0 ? "shake-down" : "shake-up");
-					this.ele.classList.remove(`attacking-${rid}`);
 					console.log("STOP", new Date().getSeconds(), new Date().getMilliseconds())
 				}, 500);
 			}, 500);

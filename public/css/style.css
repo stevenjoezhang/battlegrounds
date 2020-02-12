@@ -99,10 +99,10 @@
 .minion.poison .poison {
 	background-image: url(/img/poison.png);
 }
-.minion.shield .shield {
+.minion.shield .shield, .minion.lose-shield .shield {
 	background-image: url(/img/divine-shield.png);
 }
-.minion.shield.lose-shield .shield {
+.minion.lose-shield .shield {
 	animation: lose-shield 1s forwards;
 	animation-delay: .5s;
 }
@@ -112,7 +112,10 @@
 	animation: splat 3s forwards;
 }
 .minion.dying {
-	animation: deploy 1.5s infinite;
+	animation: exit 1.5s forwards;
+}
+.minion.approach {
+	animation: approach 1.5s ease-out;
 }
 @keyframes lose-shield {
 	from {
@@ -166,7 +169,7 @@
 		opacity: 0;
 	}
 }
-@keyframes deploy {
+@keyframes exit {
 	0% {
 		transform: scale(1);
 		max-width: 15vw;
@@ -184,6 +187,15 @@
 		max-width: 0;
 		opacity: 0;
 		filter: grayscale(1);
+	}
+}
+@keyframes approach {
+	0% {
+		transform: rotateY(90deg);
+		max-width: 0;
+	}
+	100% {
+		max-width: 15vw;
 	}
 }
 .section-decklist.shake-down {
