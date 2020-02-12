@@ -204,15 +204,13 @@ function Minion(prop) {
 		this.dead = true;
 		if (this.data.deathrattle) {
 			var animEle = this.createOverlayAnim("deathrattle-die");
+			document.body.appendChild(animEle);
+			setTimeout(() => {
+				document.body.removeChild(animEle);
+			}, 4000);
 		}
 		this.ele.classList.add("dying");
 		setTimeout(() => {
-			if (animEle) {
-				document.body.appendChild(animEle);
-				setTimeout(() => {
-					document.body.removeChild(animEle);
-				}, 4000);
-			}
 			this.ele.parentNode.removeChild(this.ele);
 		}, 1500);
 		return new Promise(resolve => {

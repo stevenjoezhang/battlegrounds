@@ -4,38 +4,38 @@ def simple_test0():
     ba = battlefeild()
     return ba
 def simple_test1():
-    a = minion("Zapp Slywick", 6, 16, spe="Zapp Slywick", g=True, ch="mech")
+    a = minion("Zapp Slywick", 6, 16, spe="Zapp Slywick", g=True)
     ba = battlefeild()
     ba.add_minion(a, "up", 0)
     return ba
 def simple_test2():
-    a = minion("Zapp Slywick", 6, 16, spe="Zapp Slywick", g=True, ch="mech")
+    a = minion("Zapp Slywick", 6, 16, spe="Zapp Slywick", g=True)
     ba = battlefeild()
     ba.add_minion(a, "down", 0)
     return ba
 def simple_test3():
-    a = minion("Zapp Slywick", 6, 16, spe="Zapp Slywick", g=True, ch="mech")
-    b = minion("Zapp Slywick", 6, 16, spe="Zapp Slywick",  ch="mech")
+    a = minion("Zapp Slywick", 6, 16, spe="Zapp Slywick", g=True)
+    b = minion("Zapp Slywick", 6, 16, spe="Zapp Slywick")
     ba = battlefeild()
     ba.add_minion(a, "down", 0)
     ba.add_minion(b, "up", 0)
     return ba
 
 def test1():
-    a = minion("Foe Reaper 4000", 6, 16, spe="Foe Reaper 4000", g=True, ch="mech")
-    b = minion("Kaboom Bot", 6, 10, ch="mech", ra="Kaboom Bot")
-    c = minion("Kaboom Bot", 10, 11, ch="mech", ra="Kaboom Bot")
-    d = minion("Kaboom Bot", 6, 11, ch="mech", ra="Kaboom Bot")
-    e = minion("Kaboom Bot", 6, 16, ch="mech", ra="Kaboom Bot")
-    f = minion("Kaboom Bot", 7, 15, ch="mech", ra="Kaboom Bot")
-    g = minion("Kaboom Bot", 5, 12, sh=True, t=True, ch="mech", ra="Kaboom Bot")
-    h = minion("Old Murk-Eye", 22, 6, sh=True, g=True, ch="murloc", spe="Old Murk-Eye")
-    i = minion("Murloc Tidehunter", 12, 12, sh=True, ch="murloc")
-    j = minion("Murloc Tidehunter", 5, 12, sh=True, ch="murloc")
-    k = minion("Murloc Tidehunter", 6, 12, sh=True, ch="murloc")
-    l = minion("Festeroot Hulk", 8, 12, sh=True, ch="murloc",spe="Festeroot Hulk")
+    a = minion("Foe Reaper 4000", 6, 16, spe="Foe Reaper 4000", g=True, ch="Mech")
+    b = minion("Kaboom Bot", 6, 10, ch="Mech", ra="Kaboom Bot")
+    c = minion("Kaboom Bot", 10, 11, ch="Mech", ra="Kaboom Bot")
+    d = minion("Kaboom Bot", 6, 11, ch="Mech", ra="Kaboom Bot")
+    e = minion("Kaboom Bot", 6, 16, ch="Mech", ra="Kaboom Bot")
+    f = minion("Kaboom Bot", 7, 15, ch="Mech", ra="Kaboom Bot")
+    g = minion("Kaboom Bot", 5, 12, sh=True, t=True, ch="Mech", ra="Kaboom Bot")
+    h = minion("Old Murk-Eye", 22, 6, sh=True, g=True, ch="Murloc", spe="Old Murk-Eye")
+    i = minion("Murloc Tidehunter", 12, 12, sh=True, ch="Murloc")
+    j = minion("Murloc Tidehunter", 5, 12, sh=True, ch="Murloc")
+    k = minion("Murloc Tidehunter", 6, 12, sh=True, ch="Murloc")
+    l = minion("Festeroot Hulk", 8, 12, sh=True, spe="Festeroot Hulk")
     m = minion("Brann Bronzebeard", 4, 6, t=True)
-    n = minion("Murloc Warleader", 5, 12, sh=True, ch="murloc", spe="Murloc Warleader")
+    n = minion("Murloc Warleader", 5, 12, sh=True, ch="Murloc", spe="Murloc Warleader")
     ba = battlefeild()
     ba.add_minion(b, "up", 0)
     ba.add_minion(a, "up", 1)
@@ -54,19 +54,19 @@ def test1():
     return ba
 
 def test2():
-    a = minion("Foe Reaper 4000", 6, 16, spe="Foe Reaper 4000", g=True, ch="mech")
-    n = minion("Murloc Warleader", 12, 112,  ch="murloc", spe="Murloc Warleader")
+    a = minion("Foe Reaper 4000", 6, 16, spe="Foe Reaper 4000", g=True, ch="Mech")
+    n = minion("Murloc Warleader", 12, 112,  ch="Murloc", spe="Murloc Warleader")
     ba = battlefeild()
     ba.add_minion(a, "up", 1)
     ba.add_minion(n, "down", 6)
     return ba
 
 def test3():
-    a = minion("Mal'Ganis", 16, 6, spe="Mal'Ganis",g=True, ch="demon")
-    b= minion("Nathrezim Overseer", 6, 16, t=True, ch="demon")
-    c=minion("Nathrezim Overseer", 3, 4, ch="demon")
-    d=minion("Nathrezim Overseer", 6, 16, ch="demon")
-    e = minion("Murloc Warleader", 12, 112, t=True, ch="murloc", spe="Murloc Warleader")
+    a = minion("Mal'Ganis", 16, 6, spe="Mal'Ganis",g=True, ch="Demon")
+    b= minion("Nathrezim Overseer", 6, 16, t=True, ch="Demon")
+    c=minion("Nathrezim Overseer", 3, 4, ch="Demon")
+    d=minion("Nathrezim Overseer", 6, 16, ch="Demon")
+    e = minion("Murloc Warleader", 12, 112, t=True, ch="Murloc", spe="Murloc Warleader")
     ba = battlefeild()
     ba.add_minion(a, "up", 0)
     ba.add_minion(b, "up", 1)
