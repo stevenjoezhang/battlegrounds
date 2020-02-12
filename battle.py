@@ -56,7 +56,7 @@ class minion:
         return self.damage
 
     def set_move(self, mo):
-        if mo!=0 and mo!=1 and mo!=2 and mo!=3:
+        if mo!=0 and mo!=1 and mo!=2:
             print ("error: wrong state")
         else:
             self.move=mo
@@ -224,7 +224,7 @@ def origin_minion_buff(lst):  #所有minion_buff
                 if j==i:
                     pass
                 else:
-                    if lst[j].get_character()==("Murloc" or "All"):
+                    if lst[j].get_character()=="Murloc" or lst[j].get_character()=="All":
                         if lst[i].get_golden():
                             lst[j].set_attack(-4)
                             lst[j].set_buff([4, 0])
@@ -245,7 +245,7 @@ def origin_minion_buff(lst):  #所有minion_buff
                 if j == i:
                     pass
                 else:
-                    if lst[j].get_character() == ("Demon" or  "All"):
+                    if lst[j].get_character() == "Demon" or  lst[j].get_character()=="All":
                         if lst[i].get_golden():
                             lst[j].set_attack(-2)
                             lst[j].set_buff([2, 0])
@@ -257,7 +257,7 @@ def origin_minion_buff(lst):  #所有minion_buff
                 if j == i:
                     pass
                 else:
-                    if lst[j].get_character() == ("Demon" or  "All"):
+                    if lst[j].get_character() == "Demon" or  lst[j].get_character()=="All":
                         if lst[i].get_golden():
                             lst[j].set_attack(-4)
                             lst[j].set_health(-4)
@@ -296,7 +296,7 @@ def add_minion_buff(lst):  #所有minion_buff
                 if j==i:
                     pass
                 else:
-                    if lst[j].get_character()==("Murloc" or "All"):
+                    if lst[j].get_character()=="Murloc" or lst[j].get_character()=="All":
                         if lst[i].get_golden():
                             lst[j].set_buff([4, 0])
                         else:
@@ -313,7 +313,7 @@ def add_minion_buff(lst):  #所有minion_buff
                 if j == i:
                     pass
                 else:
-                    if lst[j].get_character() == ("Demon" or  "All"):
+                    if lst[j].get_character() == "Demon" or  lst[j].get_character()=="All":
                         if lst[i].get_golden():
                             lst[j].set_buff([2, 0])
                         else:
@@ -323,7 +323,7 @@ def add_minion_buff(lst):  #所有minion_buff
                 if j == i:
                     pass
                 else:
-                    if lst[j].get_character() == ("Demon" or  "All"):
+                    if lst[j].get_character() == "Demon" or  lst[j].get_character()=="All":
                         if lst[i].get_golden():
                             lst[j].set_buff([4, 4])
                         else:
@@ -408,7 +408,7 @@ def single_minion_battle(m,m_lst):
         usual_minion_battle(m,m_lst[aim])
         if flag:
             lose_shield(m_lst,1)
-    elif m.get_special() == ("Foe Reaper 4000" or "Cave Hydra"):
+    elif m.get_special() == "Foe Reaper 4000" or m.get_special() =="Cave Hydra":
         aim =select_minion(m_lst)
         minionlist = len(m_lst)
    #     if aim !=-1:
@@ -490,7 +490,7 @@ def after_attack(lst):
                 i.set_attack(1)
 def after_death(pos,lst,lst2):#lst己方，lst2对方
     ch=lst[pos].get_character()
-    if ch==("Beast" or "All"):
+    if ch=="Beast" or ch=="All":
         for i in lst:
             if i.get_special() == "Scavenging Hyena":
                 if i.get_golden():
@@ -499,7 +499,7 @@ def after_death(pos,lst,lst2):#lst己方，lst2对方
                 else:
                     i.set_health(1)
                     i.set_attack(2)
-    if ch==("Mech" or "All"):
+    if ch=="Mech" or ch=="All":
         for i in lst:
             if i.get_special() == "Junkbot":
                 if i.get_golden():
@@ -508,7 +508,7 @@ def after_death(pos,lst,lst2):#lst己方，lst2对方
                 else:
                     i.set_health(2)
                     i.set_attack(2)
-    if ch==("Demon" or "All"):
+    if ch=="Demon" or ch=="All":
         for i in lst:
             if i.get_special() == "Soul Juggler":
                 times = 2 if i.get_golden() else 1
@@ -689,10 +689,10 @@ class battlefeild:
         origin_minion_buff(self.down)#Old Murk-Eye比较特殊，考虑对面,专门处理
         Murloc_num=0
         for i in self.up:
-            if i.get_character()==("Murloc" or "All") :
+            if i.get_character()=="Murloc" or i.get_character()=="All":
                 Murloc_num+=1
         for i in self.down:
-            if i.get_character()==("Murloc" or "All") :
+            if i.get_character()=="Murloc" or i.get_character()=="All":
                 Murloc_num+=1
         for i in self.up:
             if i.get_special() == "Old Murk-Eye" :
@@ -887,12 +887,12 @@ class battlefeild:
         for i in self.up:
             temp_up.append(i.get_buff_health())
             i.remove_buff()
-            if i.get_character() == ("Murloc" or "All") and (not i.get_death()):
+            if (i.get_character() == "Murloc" or i.get_character()=="All") and (not i.get_death()):
                 Murloc_num += 1
         for i in self.down:
             temp_down.append(i.get_buff_health())
             i.remove_buff()
-            if i.get_character() == ("Murloc" or "All")  and (not i.get_death()):
+            if (i.get_character() == "Murloc" or i.get_character()=="All")  and (not i.get_death()):
                 Murloc_num += 1
         add_minion_buff(self.up)
         add_minion_buff(self.down)
@@ -943,7 +943,7 @@ class battlefeild:
             if side:
                 if check_zero(self.up):
                     for i in self.up:
-                        i.set_move(3)
+                        i.set_move(1)
                     self.attack_over()
                     self.renew_attack()
                 else:
