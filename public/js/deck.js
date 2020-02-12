@@ -32,26 +32,8 @@ function randId(db) {
 async function initBoard() {
 	window.database = await fetchDB("/data.json");
 	window.battle = await fetchDB("/battle.json");
-	function addMinion(position, positionIndex) {
-		battle[0][0][position].forEach(minion => {
-			let index = database.findIndex(item => minion.name.toLowerCase() === item.name.toLowerCase());
-			let id = (index !== -1) ? ((minion.golden && database[index].goldenId) ? database[index].goldenId : database[index].id) : "TB_BaconUps_038";
-			let prop = {
-				attack: minion.atk,
-				health: minion.health,
-				belongsTo: positionIndex,
-				id,//randId(database),//"TB_BaconUps_080",
-				gid: minion.id,
-				poisonous: minion.poison,
-				shield: minion.shield,
-				taunt: minion.taunt,
-				golden: minion.golden
-			};
-			minions[minion.id] = new Minion(prop);
-		});
-	}
-	addMinion("up", 0);
-	addMinion("down", 1);
+	let board = ["up", "down"];
+	[0, 1].forEach(index => battle[0][0][board[index]].forEach(minion => minions[minion.id] = new Minion(minion, index)));
 }
 
 function makeid(length) {
@@ -64,8 +46,21 @@ function makeid(length) {
 	return result;
 }
 
-function Minion(prop) {
-	this.prop = prop;
+function Minion(prop, belongsTo) {
+	let index = database.findIndex(item => prop.name.toLowerCase() === item.name.toLowerCase());
+	let id = (index !== -1) ? ((prop.golden && database[index].goldenId) ? database[index].goldenId : database[index].id) : "TB_BaconUps_038";
+	this.prop = {
+		attack: prop.atk,
+		health: prop.health,
+		belongsTo,
+		id,
+		gid: prop.id,
+		poisonous: prop.poison,
+		shield: prop.shield,
+		taunt: prop.taunt,
+		golden: prop.golden,
+		position: null
+	};
 	this.ele = document.createElement("div");
 	this.ele.setAttribute("gid", this.prop.gid);
 	this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.prop.id));
@@ -87,7 +82,8 @@ function Minion(prop) {
 				<img src="https://art.hearthstonejson.com/v1/render/latest/${"zhCN"}/256x/${this.prop.id}.png">
 			</div>`);
 	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.prop.id}.jpg)`;
-	document.querySelectorAll(`.minions`)[this.prop.belongsTo].appendChild(this.ele);
+	if (this.prop.position) document.querySelectorAll(`.minions`)[this.prop.belongsTo].children[this.prop.position].after(this.ele);
+	else document.querySelectorAll(`.minions`)[this.prop.belongsTo].appendChild(this.ele);
 	this.initClassName = function() {
 		this.ele.classList.add("minion");
 		//if (this.data.goldenId === this.prop.id) this.ele.classList.add("golden");
