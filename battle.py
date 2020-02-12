@@ -27,10 +27,11 @@ class minion:
         self.special=spe #特殊描述
         self.deathrattle=ra
         self.rattle=False
+        self.source="origin"
 
     def set_attack(self,at):
         self.attack+=at
-        if self.attack<=0:
+        if self.attack<0:
             print ("error: wrong set attack")
     def get_attack(self):
         return self.attack
@@ -55,7 +56,7 @@ class minion:
         return self.damage
 
     def set_move(self, mo):
-        if mo!=0 and mo!=1 and mo!=2:
+        if mo!=0 and mo!=1 and mo!=2 and mo!=3:
             print ("error: wrong state")
         else:
             self.move=mo
@@ -154,6 +155,14 @@ class minion:
             print ("error: wrong special set")
     def get_special(self):
         return self.special
+
+    def set_source(self,so):
+        if so=="origin" or so=="overkill" or so=="damage" or so=="deathrattle":
+            self.source=so
+        else:
+            print ("error: wrong source set")
+    def get_source(self):
+       return self.source
 
     def get_calculated_health(self):
         return self.health+self.buff[1]-self.damage
@@ -550,6 +559,14 @@ def single_deathrattle(name,pos,lst1,lst2):
                 else:
                     lst2[target].set_damage(4)
 
+def check_zero(lst):
+    Flag=True
+    for i in lst:
+        if i.get_calculated_attack():
+            Flag=False
+            break
+    return Flag
+
 class battlefeild:
     def __init__(self, up=[], down=[]):
         self.up = up #记录上方
@@ -563,6 +580,7 @@ class battlefeild:
         self.already_attack=0
         self.dead_minion=False
         self.attack_flag=False
+        self.result=""
 
     def dump(self):
         self.log += self.__str__() + "\n";
@@ -583,9 +601,12 @@ class battlefeild:
                     "poison": minion.get_poison(),
                     "golden": minion.get_golden(),
                     "death": minion.get_rattle(),
-                    "name": minion.get_name()
+                    "name": minion.get_name(),
+                    "source": minion.get_source()
                 })
         self.history.append(current)
+    def set_log(self,lo):
+        self.log +=lo
 
     def set_dead_minion(self,de):
        if str(de) !="True" and str(de) !="False":
@@ -619,6 +640,9 @@ class battlefeild:
         return self.already_attack
     def attack_over(self):
         self.already_attack=self.attack_time
+
+    def get_result(self):
+        return self.result
 
     def add_minion(self,mi,side,pos):
         if side=="up":
@@ -686,6 +710,7 @@ class battlefeild:
                 else:
                     i.set_attack(-(Murloc_num-1))
                     i.set_buff([Murloc_num-1, 0])
+
 
     def minion_battle(self):
         side = self.now[1]
@@ -852,6 +877,8 @@ class battlefeild:
                     else:
                         self.renew_begin_attack(self.up,True)
         self.attack_flag=False
+        self.check_state()
+
 
     def renew_buff(self):
         temp_up=[]
@@ -906,6 +933,56 @@ class battlefeild:
             else:
                 pass
 
+    def deal_zero_attack(self):#选择的行动者是zero attack
+        side=self.now[1]
+        pos=self.now[0]
+        if check_zero(self.up) and check_zero(self.down):
+            self.result = "a tie"
+            self.log += self.result
+        else:
+            if side:
+                if check_zero(self.up):
+                    for i in self.up:
+                        i.set_move(3)
+                    self.attack_over()
+                    self.renew_attack()
+                else:
+                    self.up[pos].set_move(1)
+                    self.set_now(-1,side)
+                    self.renew_attack()
+            else:
+                if check_zero(self.down):
+                    for i in self.down:
+                        i.set_move(3)
+                    self.attack_over()
+                    self.renew_attack()
+                else:
+                    self.down[pos].set_move(1)
+                    self.set_now(-1,side)
+                    self.renew_attack()
+
+    def check_state(self):
+        if not self.get_dead_minion():
+            if self.up and self.down:
+                if self.now[0]<0 or self.now[0]>6:
+                    print ("error: wrong state")
+                else:
+                    if self.now[1]:
+                        if not self.up[self.now[0]].get_calculated_attack():
+                            self.deal_zero_attack()
+                    else:
+                        if not self.down[self.now[0]].get_calculated_attack():
+                            self.deal_zero_attack()
+            elif (not self.up) and (not self.down):
+                self.result = "a tie"
+                self.log += self.result
+            elif self.down :
+                self.result="down win"
+                self.log+=self.result
+            else:
+                self.result="up win"
+                self.log += self.result
+
     def __str__(self):
         str1="up:\n"
         for i in self.up:
@@ -919,19 +996,19 @@ class battlefeild:
 def battle(field):
     field.battle_begin()
     field.dump()
+    field.check_state()
    # print (field,"\n")
-    while True :
+    while not field.get_result():
         field.minion_battle()
-        field.do_deathrattle()
         field.renew_buff()
+        field.do_deathrattle()
        # field.renew_buff()
         field.dump()
         field.remove_death()
         field.detect_death()
+        field.renew_buff()
         #field.dump()
         field.renew_attack()
-        if (field.up_minion()==0 or field.down_minion()==0) and (not field.get_dead_minion()):
-            break
        # print ("a")
        # print (field,"\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
