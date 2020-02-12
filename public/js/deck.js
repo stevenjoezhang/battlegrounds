@@ -10,6 +10,15 @@ window.addEventListener("resize", setSize);
 var minions = [];
 var gid = 0;
 
+function toggleMenu() {
+	let target = document.getElementById("menu");
+	target.style.display = (target.style.display === "block") ? "none" : "block";
+}
+function toggleConsole() {
+	let target = document.getElementById("console");
+	target.style.display = (target.style.display === "block") ? "none" : "block";
+}
+
 async function fetchDB(file) {
 	let response = await fetch(file);
 	let data = await response.json();
@@ -74,7 +83,9 @@ function Minion(prop) {
 			<div class="text attack">${this.prop.attack}</div>
 			<div class="text health">${this.prop.health}</div>
 			<div class="image shield"></div>
-			<div class="image shield"></div>`);
+			<div class="preview">
+				<img src="https://art.hearthstonejson.com/v1/render/latest/${"zhCN"}/256x/${this.prop.id}.png">
+			</div>`);
 	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.prop.id}.jpg)`;
 	document.querySelectorAll(`.minions`)[this.prop.belongsTo].appendChild(this.ele);
 	this.initClassName = function() {
@@ -212,7 +223,6 @@ function Minion(prop) {
 
 (async () => {
 	await initBoard();
-	//var queue = [];
 	document.getElementById("console").innerText = battle[2];
 	for (let i in battle[1]) {
 		i = Number(i);
@@ -225,13 +235,9 @@ function Minion(prop) {
 		for (let i in minions) {
 			let minion = minions[i];
 			if (minion.dead) continue;
-			let downIndex = result.down.findIndex(ele => {
-				return ele.id === minion.prop.gid;
-			});
+			let downIndex = result.down.findIndex(ele => ele.id === minion.prop.gid);
 			let upIndex = result.up.findIndex(ele => ele.id === minion.prop.gid);
-			//console.log(downIndex, upIndex);
-			if (downIndex === -1 && upIndex === -1) queue.die.push(() => minion.die());//可以移除
-			else {
+			if (downIndex !== -1 || upIndex !== -1) {
 				let target;
 				if (downIndex !== -1) {
 					target = result.down[downIndex];
@@ -247,6 +253,7 @@ function Minion(prop) {
 					if (target.death) queue.die.push(() => minion.die());
 				}
 			}
+			//else queue.die.push(() => minion.die());
 		}
 		if (attacking.length === 2) await minions[attacking[0]].doAttack(attacking[1]);
 		if (typeof battle[3] === "number") {
@@ -254,8 +261,8 @@ function Minion(prop) {
 				setTimeout(resolve, battle[3]);
 			});
 		}
-		await Promise.all(queue.health.map(ele => ele()));
 		await Promise.all(queue.die.map(ele => ele()));
+		await Promise.all(queue.health.map(ele => ele()));
 	}
 })();
 /*

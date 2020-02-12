@@ -22,7 +22,6 @@
 .section-decklist {
 	transform-origin: top left;
 	position: relative;
-	overflow: scroll;
 	margin: 0 auto;
 }
 .background {
@@ -268,4 +267,29 @@
 	overflow: scroll;
 	z-index: 200;
 	font-family: monospace;
+}
+.preview {
+	z-index: 300;
+	display: none;
+	position: absolute;
+	transform: translateX(-90%) translateY(-30%);
+	pointer-events: none;
+}
+.minion:hover .preview {
+	display: block;
+}
+#menu-icon {
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	z-index: 300;
+	background: 0;
+	border: 0;
+	outline: 0;
+}
+#menu-icon:active {
+	transform: translateY(3px);
+}
+#menu {
+	display: none;
 }
