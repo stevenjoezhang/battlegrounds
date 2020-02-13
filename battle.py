@@ -443,10 +443,8 @@ def single_minion_battle(m,m_lst):
             len1=len(m_lst)
             if not Flag1:
                 after_injury(m_lst,aim)
-            if not Flag2 and len1==len(m_lst):#招完之后还没满，attack无dead
-                after_injury(m_lst, aim+1)
-            else:
-                after_injury(m_lst, aim + 2)
+            if not Flag2 :#招完之后还没满，attack无dead
+                after_injury(m_lst, aim+1+len(m_lst)-len1)
         elif aim == minionlist - 1:
             Flag1 = m_lst[aim-1].get_shield()
             Flag2 = m_lst[aim].get_shield()
@@ -558,6 +556,7 @@ def after_death(dead,lst,lst2):#lst己方，lst2对方
                             lose_shield(lst2,1)
                         else:
                             lst2[target].set_damage(3)
+                            after_injury(lst2,target)
 
 def lose_shield(lst,num):
     for i in lst:
@@ -647,6 +646,7 @@ def single_deathrattle(name,dead,lst1):
                     lose_shield(lst2,1)
                 else:
                     lst2[target].set_damage(4)
+                    after_injury(lst2,target)
     elif name=="Fiendish Servant":
         times = 2 if dead.get_golden() else 1
         for j in range(times):
@@ -723,6 +723,10 @@ def summon(name,attack_state,pos,lst,source,gold):#记得马上renew_buff
                 n+=1
                 lst.insert(pos+n,copies.copy())
                 after_summon(lst, charater)
+            print ("a")
+            for i in lst:
+                print (i)
+            print(pos,"\n")
 
 def after_summon(lst,ch):
     if ch=="Mech":
@@ -1193,7 +1197,7 @@ def battle(field):
         field.do_deathrattle()
        # field.renew_buff()
         field.dump()
-       # print (field,"\n")
+        print (field,"\n")
         field.remove_death()
         field.detect_death()
         field.renew_buff()
@@ -1203,18 +1207,20 @@ def battle(field):
         print (field,"c\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
     #print (field.log)
-'''
+#'''
 a=minion("Cave Hydra", 6, 18, ch="Beast", g=True,spe="Cave Hydra")
-b =minion("Cobalt Guardian", 6, 3,ch="Mech",sh=True, spe="Cobalt Guardian")
+b =minion("Cobalt Guardian", 6, 3,ch="Mech", spe="Cobalt Guardian")
 c =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
 d =minion("Security Rover", 2, 6,ch="Mech",t=True, spe="Security Rover")
 e =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
+f=minion("Khadgar", 2, 2,g=True, spe="Khadgar")
 ba = battlefeild()
 ba.add_minion(a, "up", 0)
 ba.add_minion(b, "down", 0)
-ba.add_minion(c, "down", 1)
-ba.add_minion(d, "down", 2)
-ba.add_minion(e, "down", 3)
+ba.add_minion(d, "down", 1)
+ba.add_minion(c, "down", 2)
+#ba.add_minion(e, "down", 3)
+ba.add_minion(f,"down",4)
 battle(ba)
-'''
+#'''
 
