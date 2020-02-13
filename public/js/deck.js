@@ -32,8 +32,7 @@ function randId(db) {
 async function initBoard() {
 	window.database = await fetchDB("/data.json");
 	window.battle = await fetchDB("/battle.json");
-	let board = ["up", "down"];
-	[0, 1].forEach(index => battle[0][0][board[index]].forEach(prop => minions[prop.id] = new Minion(prop, index)));
+	["up", "down"].forEach(name => battle[0][0][name].forEach(prop => minions[prop.id] = new Minion(prop, name)));
 }
 
 function makeid(length) {
@@ -46,13 +45,15 @@ function makeid(length) {
 	return result;
 }
 
-function Minion(prop, belongsTo) {
+function Minion(prop, name) {
 	let index = database.findIndex(item => prop.name.toLowerCase() === item.name.toLowerCase());
+	//this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.prop.id));
+	this.data = database[index];
 	let id = (index !== -1) ? ((prop.golden && database[index].goldenId) ? database[index].goldenId : database[index].id) : "TB_BaconUps_038";
 	this.prop = {
 		attack: prop.atk,
 		health: prop.health,
-		belongsTo,
+		belongsTo: ["up", "down"].indexOf(name),
 		id,
 		gid: prop.id,
 		poisonous: prop.poison,
@@ -60,12 +61,10 @@ function Minion(prop, belongsTo) {
 		taunt: prop.taunt,
 		golden: prop.golden,
 		source: prop.source,
-		position: null
+		position: prop.position
 	};
 	this.ele = document.createElement("div");
 	this.ele.setAttribute("gid", this.prop.gid);
-	this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.prop.id));
-	this.data = database[this.dbIndex];
 	this.dead = false;
 	this.ele.insertAdjacentHTML("afterbegin", `
 			<div class="image art"></div>
@@ -86,15 +85,17 @@ function Minion(prop, belongsTo) {
 	if (this.prop.position) document.querySelectorAll(`.minions`)[this.prop.belongsTo].children[this.prop.position].after(this.ele);
 	else document.querySelectorAll(`.minions`)[this.prop.belongsTo].appendChild(this.ele);
 	this.animationTimer = function(target, className) {
-		target.classList.add(className);
-		let listener = target.addEventListener("animationend", () => {
-			target.classList.remove(className);
-			target.removeEventListener("animationend", listener);
-		});
+		return new Promise(resolve => {
+			target.classList.add(className);
+			let listener = target.addEventListener("animationend", () => {
+				target.classList.remove(className);
+				target.removeEventListener("animationend", listener);
+				resolve();
+			});
+		})
 	}
 	this.initClassName = function() {
 		this.ele.classList.add("minion");
-		this.animationTimer(this.ele, "approach")
 		//if (this.data.goldenId === this.prop.id) this.ele.classList.add("golden");
 		if (this.prop.golden) this.ele.classList.add("golden");
 		if (this.data.divineShield) this.ele.classList.add("shield");
@@ -226,31 +227,25 @@ function Minion(prop, belongsTo) {
 		let result = battle[0][i + 1];
 		let queue = {
 			health: [],
-			die: []
+			die: [],
+			summon: []
 		};
-		for (let i in minions) {
-			let minion = minions[i];
-			if (minion.dead) continue;
-			let downIndex = result.down.findIndex(ele => ele.id === minion.prop.gid);
-			let upIndex = result.up.findIndex(ele => ele.id === minion.prop.gid);
-			if (downIndex !== -1 || upIndex !== -1) {
-				let target;
-				if (downIndex !== -1) {
-					target = result.down[downIndex];
-					queue.health.push(() => minion.setHealth(target.health));
-					queue.health.push(() => minion.setAttack(target.atk));
-					queue.health.push(() => minion.setShield(target.shield));
-					if (target.death) queue.die.push(() => minion.die());
-				} else {
-					target = result.up[upIndex];
-					queue.health.push(() => minion.setHealth(target.health));
-					queue.health.push(() => minion.setAttack(target.atk));
-					queue.health.push(() => minion.setShield(target.shield));
-					if (target.death) queue.die.push(() => minion.die());
+		["up", "down"].forEach(name => {
+			result[name].forEach(target => {
+				let minion = minions[target.id];
+				if (!minion) {
+					minion = minions[target.id] = new Minion(target, name);
+					queue.summon.push(() => {
+						return minion.animationTimer(this.ele, "summon");
+					});
+					return;
 				}
-			}
-			//else queue.die.push(() => minion.die());
-		}
+				queue.health.push(() => minion.setHealth(target.health));
+				queue.health.push(() => minion.setAttack(target.atk));
+				queue.health.push(() => minion.setShield(target.shield));
+				if (target.death) queue.die.push(() => minion.die());
+			});
+		});
 		if (attacking.length === 2) await minions[attacking[0]].doAttack(attacking[1]);
 		if (typeof battle[3] === "number") {
 			await new Promise(resolve => {
@@ -259,10 +254,11 @@ function Minion(prop, belongsTo) {
 		}
 		await Promise.all(queue.die.map(ele => ele()));
 		await Promise.all(queue.health.map(ele => ele()));
+		await Promise.all(queue.summon.map(ele => ele()));
 	}
 })();
-/*
 
+/*
 document.querySelectorAll(".minion").forEach(ele => {
 	//ele,
 });

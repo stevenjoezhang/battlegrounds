@@ -114,8 +114,8 @@
 .minion.dying {
 	animation: exit 1.5s forwards;
 }
-.minion.approach {
-	animation: approach 1.5s ease-out;
+.minion.summon {
+	animation: summon 1.5s ease-out;
 }
 @keyframes lose-shield {
 	from {
@@ -189,7 +189,7 @@
 		filter: grayscale(1);
 	}
 }
-@keyframes approach {
+@keyframes summon {
 	0% {
 		transform: rotateY(90deg);
 		max-width: 0;
