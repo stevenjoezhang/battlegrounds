@@ -3,7 +3,9 @@ import database
 ch_list=("Beast","Murloc","Mech","Demon","All")
 special_list=("Dire Wolf Alpha","Murloc Warleader","Phalanx Commander","Siegebreaker","Mal'Ganis","Old Murk-Eye",\
               "Zapp Slywick","Foe Reaper 4000","Cave Hydra","Ironhide Direhorn","The Boogeymonster",\
-              "Festeroot Hulk","Bolvar, Fireblood","Scavenging Hyena","Junkbot", "Soul Juggler","Kaboom Bot")
+              "Festeroot Hulk","Bolvar, Fireblood","Scavenging Hyena","Junkbot", "Soul Juggler","Kaboom Bot", \
+              "Baron Rivendare","Fiendish Servant","Selfless Hero","Spawn of N'Zoth","Tortollan Shellraiser", \
+              "King Bagurgle","Goldrinn, the Great Wolf")
 #m_b_list=("Dire Wolf Alpha","Murloc Warleader","Phalanx Commander","Siegebreaker","Mal'Ganis","Old Murk-Eye")
 #d_s_list=("Mecharoo","")
 
@@ -56,10 +58,10 @@ class minion:
         return self.damage
 
     def set_move(self, mo):
-        if mo!=0 and mo!=1 and mo!=2:
-            print ("error: wrong state")
+        if mo in [0,1,2]:
+            self.move = mo
         else:
-            self.move=mo
+            print ("error: wrong move state")
     def get_move(self):
         return self.move
 
@@ -72,7 +74,7 @@ class minion:
         return self.character
 
     def set_shield(self,sh):
-        if str(sh)== "True" or str(sh)=="False":
+        if str(sh) in ["True","False"]:
             self.shield = sh
         else:
             print ("error: wrong shield set")
@@ -80,7 +82,7 @@ class minion:
         return self.shield
 
     def set_golden(self, go):
-        if str(go)== "True" or str(go)=="False":
+        if str(go)in ["True","False"]:
             self.golden = go
         else:
             print ("error: wrong golden set")
@@ -88,7 +90,7 @@ class minion:
         return self.golden
 
     def set_taunt(self,t):
-        if str(t)== "True" or str(t)=="False":
+        if str(t)in ["True","False"]:
             self.taunt = t
         else:
             print ("error: wrong taunt set")
@@ -96,7 +98,7 @@ class minion:
         return self.taunt
 
     def set_poison(self,p):
-        if str(p)== "True" or str(p)=="False":
+        if str(p) in ["True","False"]:
             self.poison = p
         else:
             print ("error: wrong poison set")
@@ -104,15 +106,15 @@ class minion:
         return self.poison
 
     def set_wind(self,w):
-        if w != 1 and w != 2 and w != 4:
-            print ("error: wrong wind set")
-        else:
+        if w in [1,2,4]:
             self.wind = w
+        else:
+            print ("error: wrong wind set")
     def get_wind(self):
         return self.wind
 
     def set_rattle(self,ra):
-        if str(ra)== "True" or str(ra)=="False":
+        if str(ra) in ["True","False"]:
             self.rattle = ra
         else:
             print ("error: wrong rattle set")
@@ -133,7 +135,7 @@ class minion:
         self.buff=[0,0]
 
     def set_death(self,dea):
-        if str(dea)== "True" or str(dea)=="False":
+        if str(dea) in ["True","False"]:
             self.death = dea
         else:
             print ("error: wrong death set")
@@ -157,7 +159,7 @@ class minion:
         return self.special
 
     def set_source(self,so):
-        if so=="origin" or so=="overkill" or so=="damage" or so=="deathrattle":
+        if so in ["origin","overkill","damage","deathrattle"]:
             self.source=so
         else:
             print ("error: wrong source set")
@@ -173,14 +175,20 @@ class minion:
         return "name "+self.name+" attack "+str(self.attack)+"+"+str(self.buff[0])+" health "+str(self.health)+"+"+str(self.buff[1])+" damage "+str(self.damage)+" shield "+str(self.shield)+" "+self.special
 
     def minion_attack(self,other):
-          if self.shield:
+          if self.shield and other.get_calculated_attack()>0:
               self.set_shield(False)
-          elif other.poison:
-              self.set_damage(other.attack + other.buff[0])
+          elif other.poison and other.get_calculated_attack()>0:
+              self.set_damage(other.get_calculated_attack())
               self.set_death(True)
           else:
-              self.set_damage(other.attack+other.buff[0])
+              self.set_damage(other.get_calculated_attack())
              # print (self.damage)
+
+    def copy(self):
+        new=minion(self.name,self.attack,self.health,self.character,self.taunt,self.shield,self.poison,self.wind,self.damage,\
+                   self.move,self.death,self.golden,self.special,self.deathrattle)
+        new.set_source(self.source)
+        return new
 
     def __eq__(self, other):
         if str(self)==str(other):
@@ -224,7 +232,7 @@ def origin_minion_buff(lst):  #所有minion_buff
                 if j==i:
                     pass
                 else:
-                    if lst[j].get_character()=="Murloc" or lst[j].get_character()=="All":
+                    if lst[j].get_character() in ["Murloc","All"]:
                         if lst[i].get_golden():
                             lst[j].set_attack(-4)
                             lst[j].set_buff([4, 0])
@@ -245,7 +253,7 @@ def origin_minion_buff(lst):  #所有minion_buff
                 if j == i:
                     pass
                 else:
-                    if lst[j].get_character() == "Demon" or  lst[j].get_character()=="All":
+                    if lst[j].get_character() in ["Demon","All"]:
                         if lst[i].get_golden():
                             lst[j].set_attack(-2)
                             lst[j].set_buff([2, 0])
@@ -257,7 +265,7 @@ def origin_minion_buff(lst):  #所有minion_buff
                 if j == i:
                     pass
                 else:
-                    if lst[j].get_character() == "Demon" or  lst[j].get_character()=="All":
+                    if lst[j].get_character() in ["Demon","All"]:
                         if lst[i].get_golden():
                             lst[j].set_attack(-4)
                             lst[j].set_health(-4)
@@ -296,7 +304,7 @@ def add_minion_buff(lst):  #所有minion_buff
                 if j==i:
                     pass
                 else:
-                    if lst[j].get_character()=="Murloc" or lst[j].get_character()=="All":
+                    if lst[j].get_character() in ["Murloc","All"]:
                         if lst[i].get_golden():
                             lst[j].set_buff([4, 0])
                         else:
@@ -313,7 +321,7 @@ def add_minion_buff(lst):  #所有minion_buff
                 if j == i:
                     pass
                 else:
-                    if lst[j].get_character() == "Demon" or  lst[j].get_character()=="All":
+                    if lst[j].get_character() in ["Demon","All"]:
                         if lst[i].get_golden():
                             lst[j].set_buff([2, 0])
                         else:
@@ -323,7 +331,7 @@ def add_minion_buff(lst):  #所有minion_buff
                 if j == i:
                     pass
                 else:
-                    if lst[j].get_character() == "Demon" or  lst[j].get_character()=="All":
+                    if lst[j].get_character() in ["Demon","All"]:
                         if lst[i].get_golden():
                             lst[j].set_buff([4, 4])
                         else:
@@ -387,8 +395,9 @@ def usual_minion_battle(minion1,minion2): #minion1是攻击方
     minion2.minion_attack(minion1)
     minion1.set_move(2)
 def single_minion_battle(m,m_lst):
-    be_attack=[]
+    be_attack=""
     aim=-2
+    Flag=False
     if m.get_special() == "Zapp Slywick":
         if m.get_golden():
             m.set_wind(4)
@@ -403,13 +412,16 @@ def single_minion_battle(m,m_lst):
             if temp[i] == min1:
                 temp1.append(i)  #记录所有最低攻对应的序号
         aim = random.choice(temp1)
-        be_attack.append(aim)
+        be_attack=id(m_lst[aim])
         flag=m_lst[aim].get_shield()
         usual_minion_battle(m,m_lst[aim])
         if flag:
             lose_shield(m_lst,1)
-    elif m.get_special() == "Foe Reaper 4000" or m.get_special() =="Cave Hydra":
+        else:
+           after_injury(m_lst,aim)
+    elif (m.get_special() in ["Foe Reaper 4000","Cave Hydra"]):
         aim =select_minion(m_lst)
+        be_attack=id(m_lst[aim])
         minionlist = len(m_lst)
    #     if aim !=-1:
         if minionlist == 1:
@@ -418,42 +430,64 @@ def single_minion_battle(m,m_lst):
             m_lst[aim].minion_attack(m)
             if flag:
                 lose_shield(m_lst, 1)
-            be_attack.append( aim)
+            else:
+               after_injury(m_lst,aim)
         elif aim == 0:
-            num = (1 if m_lst[aim].get_shield() else 0)+(1 if m_lst[aim+1].get_shield() else 0)
+            Flag1=m_lst[aim].get_shield()
+            Flag2=m_lst[aim+1].get_shield()
+            num = (1 if Flag1 else 0)+(1 if Flag2 else 0)
             m.minion_attack(m_lst[aim])
             m_lst[aim].minion_attack(m)
             m_lst[aim + 1].minion_attack(m)
             lose_shield(m_lst, num)
-            be_attack.append(aim)
-            be_attack.append(aim+1)
+            len1=len(m_lst)
+            if not Flag1:
+                after_injury(m_lst,aim)
+            if not Flag2 and len1==len(m_lst):#招完之后还没满，attack无dead
+                after_injury(m_lst, aim+1)
+            else:
+                after_injury(m_lst, aim + 2)
         elif aim == minionlist - 1:
-            num = (1 if m_lst[aim].get_shield() else 0) + (1 if m_lst[aim - 1].get_shield() else 0)
+            Flag1 = m_lst[aim-1].get_shield()
+            Flag2 = m_lst[aim].get_shield()
+            num = (1 if Flag1 else 0) + (1 if Flag2 else 0)
             m.minion_attack(m_lst[aim])
             m_lst[aim].minion_attack(m)
             m_lst[aim - 1].minion_attack(m)
             lose_shield(m_lst, num)
-            be_attack.append(aim)
-            be_attack.append(aim-1)
+            len1 = len(m_lst)
+            if not Flag1:
+                after_injury(m_lst, aim-1)
+            if (not Flag2):  # 招完之后还没满，attack无dead
+                after_injury(m_lst, aim+len(m_lst)-len1)
         else:
-            num = (1 if m_lst[aim].get_shield() else 0) + (1 if m_lst[aim - 1].get_shield() else 0)+(1 if m_lst[aim + 1].get_shield() else 0)
+            Flag1 = m_lst[aim - 1].get_shield()
+            Flag2 = m_lst[aim].get_shield()
+            Flag3=m_lst[aim+1].get_shield()
+            num = (1 if Flag1 else 0) + (1 if Flag2 else 0)+(1 if Flag3 else 0)
             m.minion_attack(m_lst[aim])
             m_lst[aim].minion_attack(m)
             m_lst[aim + 1].minion_attack(m)
             m_lst[aim - 1].minion_attack(m)
             lose_shield(m_lst, num)
-            be_attack.append(aim)
-            be_attack.append(aim-1)
-            be_attack.append(aim+1)
+            len1 = len(m_lst)
+            if not Flag1:
+                after_injury(m_lst, aim - 1)
+            if (not Flag2) :  # 招完之后还没满，attack无dead
+                after_injury(m_lst, aim + len(m_lst)-len1)
+            if (not Flag3) :  # 招完之后还没满，attack无dead
+                after_injury(m_lst, aim + 1+len(m_lst)-len1)
         m.set_move(2)
     elif m.get_special() == "The Boogeymonster":
         aim = select_minion(m_lst)
+        be_attack=id(m_lst[aim])
        # if aim!=-1:
         flag=m_lst[aim].get_shield()
         usual_minion_battle(m,m_lst[aim])
         if flag:
             lose_shield(m_lst,1)
-        be_attack.append(aim)
+        else:
+            after_injury(m_lst,aim)
         if m_lst[aim].get_damage() >= (m_lst[aim].get_health() + m_lst[aim].get_buff_health()) and m.get_damage() < (m.get_health() + m.get_buff_health()):
             if m.get_golden():
                 m.set_health(4)
@@ -463,23 +497,27 @@ def single_minion_battle(m,m_lst):
                 m.set_attack(2)
     elif m.get_special() == "Ironhide Direhorn":
         aim = select_minion(m_lst)
+        be_attack=id(m_lst[aim])
       #  if aim!=-1:
         flag=m_lst[aim].get_shield()
         usual_minion_battle(m,m_lst[aim])
+        if m_lst[aim].get_damage() > (m_lst[aim].get_health() + m_lst[aim].get_buff_health()):
+            Flag=True
         if flag:
             lose_shield(m_lst,1)
-        be_attack.append(aim)
-        if m_lst[aim].get_damage() > (m_lst[aim].get_health() + m_lst[aim].get_buff_health()):
-            pass #还没有写summon函数
+        else:
+           after_injury(m_lst,aim)
     else:
         aim = select_minion(m_lst)
+        be_attack=id(m_lst[aim])
        # if aim!=-1:
         flag=m_lst[aim].get_shield()
         usual_minion_battle(m,m_lst[aim])
         if flag:
             lose_shield(m_lst,1)
-        be_attack.append(aim)
-    return [be_attack,id(m_lst[aim])]
+        else:
+            after_injury(m_lst, aim)
+    return [Flag,be_attack]
 
 def after_attack(lst):
     for i in lst:
@@ -488,37 +526,33 @@ def after_attack(lst):
                 i.set_attack(2)
             else:
                 i.set_attack(1)
-def after_death(pos,lst,lst2):#lst己方，lst2对方
-    ch=lst[pos].get_character()
-    if ch=="Beast" or ch=="All":
+def after_death(dead,lst,lst2):#lst己方，lst2对方
+    ch=dead.get_character()
+    if ch in ["Beast","All"]:
         for i in lst:
-            if i.get_special() == "Scavenging Hyena":
+            if i.get_special() == "Scavenging Hyena" and (not i.get_death()):
                 if i.get_golden():
                     i.set_health(2)
                     i.set_attack(4)
                 else:
                     i.set_health(1)
                     i.set_attack(2)
-    if ch=="Mech" or ch=="All":
+    if ch in ["Mech","All"] :
         for i in lst:
-            if i.get_special() == "Junkbot":
+            if i.get_special() == "Junkbot" and (not i.get_death()):
                 if i.get_golden():
                     i.set_health(4)
                     i.set_attack(4)
                 else:
                     i.set_health(2)
                     i.set_attack(2)
-    if ch=="Demon" or ch=="All":
+    if ch in ["Demon","All"]:
         for i in lst:
-            if i.get_special() == "Soul Juggler":
+            if i.get_special() == "Soul Juggler" and (not i.get_death()):
                 times = 2 if i.get_golden() else 1
                 for j in range(times):
-                    avail = []
-                    for k in range(len(lst2)):  # 不选择死亡随从为目标
-                        if (not lst2[k].get_death()) and lst2[k].get_calculated_health() > 0:
-                            avail.append(k)
-                    if avail:  # 没死光
-                        target = random.choice(avail)
+                    target=select_undead(lst2)
+                    if target!=-1:
                         if lst2[target].get_shield():
                             lst2[target].set_shield(False)
                             lose_shield(lst2,1)
@@ -532,9 +566,46 @@ def lose_shield(lst,num):
                 i.set_attack(4*num)
             else:
                 i.set_attack(2*num)
+def after_injury(lst,pos):
+    if lst[pos].get_special()=="Security Rover":
+        summon("Guard Bot", lst[pos].get_move(), pos + 1, lst, "damage", lst[pos].get_golden())
+    elif lst[pos].get_special()=="Imp Gang Boss":
+        summon("Imp", lst[pos].get_move(), pos + 1, lst, "damage", lst[pos].get_golden())
+    else:
+        pass
 
-def set_minion(temp,attack_state):#从database的dictionary形式变成minion类
-    a=minion(na=temp["name"],at=temp["atk"],he=temp["heath"],ch=temp["tribe"],t=temp["taunt"],sh=temp["divineShield"],p=temp["poisonous"],w=2 if temp["windfury"] else 1)
+
+def summon_buff(minion1,lst):
+    if minion1.get_character()=="Beast":
+        for j in lst:
+            if j.get_special()=="Mama Bear" and(not j.get_death()):
+                if j.get_golden():
+                    minion1.set_health(8)
+                    minion1.set_attach(8)
+                else:
+                    minion1.set_health(4)
+                    minion1.set_attach(4)
+            elif j.get_special()=="Pack Leader" and(not j.get_death()):
+                if j.get_golden():
+                    minion1.set_attach(6)
+                else:
+                    minion1.set_attach(3)
+def duplicate(lst):
+    times=0
+    num=0
+    for i in lst:
+        if i.get_special()=="Khadgar" and (not i.get_death()):
+            if i.get_golden():
+                times+=1
+                num+=2**times
+            else:
+                times+=1
+                num+=2**(times-1)
+    return num
+
+def set_minion(temp,attack_state,golden):#从database的dictionary形式变成minion类
+    num=2 if golden else 1
+    a=minion(na=temp["name"],at=temp["atk"]*num,he=temp["health"]*num,ch=temp["tribe"],t=temp["taunt"],sh=temp["divineShield"],p=temp["poisonous"],w=2 if temp["windfury"] else 1)
     if temp["name"] in special_list:
         a.set_special(temp["name"])
     if attack_state==1:
@@ -543,21 +614,88 @@ def set_minion(temp,attack_state):#从database的dictionary形式变成minion类
         a.set_deathrattle((temp["name"]))
     return a
 
-def single_deathrattle(name,pos,lst1,lst2):
+def deathrattle_time(lst):
+    time=1
+    for i in lst:
+        if i.get_special()=="Baron Rivendare":
+            if i.get_golden():
+                time=3
+                break
+            else:
+                time=2
+    return time
+
+def select_undead(lst):
+    avail = []
+    for i in range(len(lst)):  # 不选择死亡随从为目标
+        if (not lst[i].get_death()) and lst[i].get_calculated_health() > 0:
+            avail.append(i)
+    if avail:  # 没死光
+        target = random.choice(avail)
+        return target
+    else:
+        return -1
+
+def single_deathrattle(name,dead,lst1):
     if name == "Kaboom Bot":
-        times=2 if lst1[pos].get_golden() else 1
+        times=2 if dead.get_golden() else 1
         for j in range(times):
-            avail = []
-            for i in range(len(lst2)):  # 不选择死亡随从为目标
-                if (not lst2[i].get_death()) and lst2[i].get_calculated_health()>0:
-                    avail.append(i)
-            if avail:  # 没死光
-                target = random.choice(avail)
+            target=select_undead(lst2)
+            if target!=-1:
                 if lst2[target].get_shield():
                     lst2[target].set_shield(False)
                     lose_shield(lst2,1)
                 else:
                     lst2[target].set_damage(4)
+    elif name=="Fiendish Servant":
+        times = 2 if dead.get_golden() else 1
+        for j in range(times):
+            target = select_undead(lst1)
+            if target != -1:
+                lst1[target].set_attack(dead.get_calculated_attack())
+    elif name=="Selfless Hero":
+        times = 2 if dead.get_golden() else 1
+        for j in range(times):
+            avail = []
+            for i in range(len(lst1)):  # 不选择死亡和有盾的随从为目标
+                if (not lst1[i].get_death()) and lst1[i].get_calculated_health() > 0 and (not lst1[i].get_shield()):
+                    avail.append(i)
+            if avail:
+                target = random.choice(avail)
+                lst1[target].set_shield(True)
+    elif name=="Spawn of N'Zoth":
+        buff = 2 if dead.get_golden() else 1
+        for i in lst1:
+            if (not i.get_death()):
+                i.set_attack(buff)
+                i.set_health(buff)
+    elif name=="Tortollan Shellraiser":
+        buff = 2 if dead.get_golden() else 1
+        target = select_undead(lst1)
+        if target != -1:
+            lst1[target].set_attack(buff)
+            lst1[target].set_health(buff)
+    elif name=="King Bagurgle":
+        buff = 4 if dead.get_golden() else 2
+        for i in lst1:
+            if (not i.get_death()) and (i.get_character() in ["Murloc","All"]):
+                i.set_attack(buff)
+                i.set_health(buff)
+    elif name=="Goldrinn, the Great Wolf":
+        buff = 8 if dead.get_golden() else 4
+        for i in lst1:
+            if (not i.get_death()) and (i.get_character() in ["Beast","All"]):
+                i.set_attack(buff)
+                i.set_health(buff)
+    else:
+        pass
+
+def alive_num(lst):
+    num=0
+    for i in lst:
+        if (not i.get_death()):
+            num+=1
+    return num
 
 def check_zero(lst):
     Flag=True
@@ -566,6 +704,39 @@ def check_zero(lst):
             Flag=False
             break
     return Flag
+
+def summon(name,attack_state,pos,lst,source,gold):#记得马上renew_buff
+    if alive_num(lst)<7:
+        dic=database.get_minions_by_name(name)
+        if dic:
+            minion1=set_minion(dic[0],attack_state,gold)
+            minion1.set_source(source)
+            charater=minion1.get_character()
+            summon_buff(minion1,lst)
+            lst.insert(pos,minion1.copy())
+            after_summon(lst,charater)
+            copies=minion1.copy()
+            summon_buff(copies,lst)
+            times=duplicate(lst)
+            n=0
+            while (n<times and alive_num(lst)<7):
+                n+=1
+                lst.insert(pos+n,copies.copy())
+                after_summon(lst, charater)
+
+def after_summon(lst,ch):
+    if ch=="Mech":
+        for i in lst:
+            if i.get_special()=="Cobalt Guardian":
+                i.set_shield(True)
+    elif ch=="Murloc":
+        for i in lst:
+            if i.get_special() == "Murloc Tidecaller":
+                if i.get_golden():
+                    i.set_attack(2)
+                else:
+                    i.set_attack(1)
+
 
 class battlefeild:
     def __init__(self, up=[], down=[]):
@@ -646,12 +817,12 @@ class battlefeild:
 
     def add_minion(self,mi,side,pos):
         if side=="up":
-            if pos>=0 and len(self.up)+1 <= 7:
+            if pos>=0 and len(self.up) < 7:
                 self.up.insert(pos,mi)  #这里注意如果列表只有4个minion，直接插入第六个会使其变成第五而不是第六
             else:
                 print ("error: wrong position to add a minion1")
         elif side=="down":
-            if pos>=0 and len(self.down)+1 <= 7:
+            if pos>=0 and len(self.down) < 7:
                 self.down.insert(pos,mi)  #这里注意如果列表只有4个minion，直接插入第六个会使其变成第五而不是第六
             else:
                 print ("error: wrong position to add a minion2")
@@ -689,10 +860,10 @@ class battlefeild:
         origin_minion_buff(self.down)#Old Murk-Eye比较特殊，考虑对面,专门处理
         Murloc_num=0
         for i in self.up:
-            if i.get_character()=="Murloc" or i.get_character()=="All":
+            if i.get_character()in ["Murloc","All"]:
                 Murloc_num+=1
         for i in self.down:
-            if i.get_character()=="Murloc" or i.get_character()=="All":
+            if i.get_character()in ["Murloc","All"]:
                 Murloc_num+=1
         for i in self.up:
             if i.get_special() == "Old Murk-Eye" :
@@ -711,7 +882,6 @@ class battlefeild:
                     i.set_attack(-(Murloc_num-1))
                     i.set_buff([Murloc_num-1, 0])
 
-
     def minion_battle(self):
         side = self.now[1]
         pos=self.now[0]
@@ -722,8 +892,10 @@ class battlefeild:
             elif side:
                 if (not self.dead_minion):
                     Flag=self.up[pos].get_shield()
+                    damage1=self.up[pos].get_damage()
                     temp = single_minion_battle(self.up[pos], self.down)
-                    if Flag:
+                    damage2=self.up[pos].get_damage()
+                    if Flag and (not self.up[pos].get_shield()):
                         lose_shield(self.up,1)
                     attack_state.append(id(self.up[pos]))
                     attack_state.append(temp[1])
@@ -731,6 +903,10 @@ class battlefeild:
                     self.add_already_attack()
                     self.detect_death()
                     self.attack_flag=True
+                    if temp[0]:
+                        summon("Ironhide Runt", 0, pos + 1, self.up, "overkill", self.up[pos].get_golden())
+                    if damage2-damage1>0:
+                        after_injury(self.up,pos)
                     after_attack(self.up)
                 if pos !=-1:
                     if self.up[pos].get_death():
@@ -738,15 +914,21 @@ class battlefeild:
             else:
                 if (not self.dead_minion) and self.down:
                     Flag = self.down[pos].get_shield()
+                    damage1 = self.down[pos].get_damage()
                     temp=single_minion_battle(self.down[pos], self.up)
-                    if Flag:
-                        lose_shield(self.down, 1)
+                    damage2 = self.down[pos].get_damage()
+                    if Flag and (not self.down[pos].get_shield()):
+                        lose_shield(self.down,1)
                     attack_state.append(id(self.down[pos]))
                     attack_state.append(temp[1])
                     self.set_attack_time()
                     self.add_already_attack()
                     self.detect_death()
                     self.attack_flag = True
+                    if temp[0]:
+                        summon("Ironhide Runt", 0, pos + 1, self.down, "overkill", self.down[pos].get_golden())
+                    if damage2-damage1>0:
+                        after_injury(self.down,pos)
                     after_attack(self.down)
                 if pos!=-1:
                     if self.down[pos].get_death():
@@ -762,36 +944,47 @@ class battlefeild:
                 if i.get_death():
                     i.set_rattle(True)
             if self.begin:
-                for i in range(len(self.up)):
-                    if self.up[i].get_rattle():
-                        deathrattle_lst = self.up[i].get_deathrattle().split("+")
-                        if deathrattle_lst[0]:
-                            for j in deathrattle_lst:
+                times = deathrattle_time(self.up)
+                dead = list(filter(lambda x: x.get_rattle(), self.up))
+                for i in dead:
+                    deathrattle_lst = i.get_deathrattle().split("+")
+                    if deathrattle_lst[0]:
+                        for j in deathrattle_lst:
+                            for k in range(times):
                                 single_deathrattle(j,i,self.up,self.down)
-                        after_death(i,self.up,self.down)
-                for i in range(len(self.down)):
-                    if self.down[i].get_rattle():
-                        deathrattle_lst = self.down[i].get_deathrattle().split("+")
-                        if deathrattle_lst[0]:
-                            for j in deathrattle_lst:
+                                self.renew_buff()
+                    after_death(i,self.up,self.down)
+                times=deathrattle_time(self.down)
+                dead = list(filter(lambda x: x.get_rattle(), self.down))
+                for i in dead:
+                    deathrattle_lst = i.get_deathrattle().split("+")
+                    if deathrattle_lst[0]:
+                        for j in deathrattle_lst:
+                            for k in range(times):
                                 single_deathrattle(j, i, self.down, self.up)
-                        after_death(i, self.down, self.up)
+                                self.renew_buff()
+                    after_death(i, self.down, self.up)
             else:
-                for i in range(len(self.down)):
-                    if self.down[i].get_rattle():
-                        deathrattle_lst = self.down[i].get_deathrattle().split("+")
-                        if deathrattle_lst[0]:
-                            for j in deathrattle_lst:
+                times = deathrattle_time(self.down)
+                dead = list(filter(lambda x: x.get_rattle(), self.down))
+                for i in dead:
+                    deathrattle_lst = i.get_deathrattle().split("+")
+                    if deathrattle_lst[0]:
+                        for j in deathrattle_lst:
+                            for k in range(times):
                                 single_deathrattle(j, i, self.down, self.up)
-                        after_death(i, self.down, self.up)
-                for i in range(len(self.up)):
-                    if self.up[i].get_rattle():
-                        deathrattle_lst = self.up[i].get_deathrattle().split("+")
-                        if deathrattle_lst[0]:
-                            for j in deathrattle_lst:
-                                single_deathrattle(j,i,self.up,self.down)
-                        after_death(i,self.up,self.down)
-
+                                self.renew_buff()
+                    after_death(i, self.down, self.up)
+                times = deathrattle_time(self.up)
+                dead = list(filter(lambda x: x.get_rattle(), self.up))
+                for i in dead:
+                    deathrattle_lst = i.get_deathrattle().split("+")
+                    if deathrattle_lst[0]:
+                        for j in deathrattle_lst:
+                            for k in range(times):
+                                single_deathrattle(j, i, self.up, self.down)
+                                self.renew_buff()
+                    after_death(i, self.up, self.down)
 
 
     def detect_death(self):
@@ -812,9 +1005,6 @@ class battlefeild:
     def remove_death(self):
         self.up=list(filter(lambda x: not x.get_rattle(), self.up))
         self.down=list(filter(lambda x: not x.get_rattle(), self.down))
-
-    def summon(self,lst):
-        pass
 
     def renew_begin_attack(self,lst,side):
         self.reset_already_attack()
@@ -879,7 +1069,6 @@ class battlefeild:
         self.attack_flag=False
         self.check_state()
 
-
     def renew_buff(self):
         temp_up=[]
         temp_down=[]
@@ -887,12 +1076,12 @@ class battlefeild:
         for i in self.up:
             temp_up.append(i.get_buff_health())
             i.remove_buff()
-            if (i.get_character() == "Murloc" or i.get_character()=="All") and (not i.get_death()):
+            if (i.get_character()in ["Murloc","All"]) and (not i.get_death()):
                 Murloc_num += 1
         for i in self.down:
             temp_down.append(i.get_buff_health())
             i.remove_buff()
-            if (i.get_character() == "Murloc" or i.get_character()=="All")  and (not i.get_death()):
+            if (i.get_character() in ["Murloc","All"])  and (not i.get_death()):
                 Murloc_num += 1
         add_minion_buff(self.up)
         add_minion_buff(self.down)
@@ -953,7 +1142,7 @@ class battlefeild:
             else:
                 if check_zero(self.down):
                     for i in self.down:
-                        i.set_move(3)
+                        i.set_move(1)
                     self.attack_over()
                     self.renew_attack()
                 else:
@@ -965,7 +1154,7 @@ class battlefeild:
         if not self.get_dead_minion():
             if self.up and self.down:
                 if self.now[0]<0 or self.now[0]>6:
-                    print ("error: wrong state")
+                    print ("error: wrong state",self.now)
                 else:
                     if self.now[1]:
                         if not self.up[self.now[0]].get_calculated_attack():
@@ -997,19 +1186,35 @@ def battle(field):
     field.battle_begin()
     field.dump()
     field.check_state()
-   # print (field,"\n")
+    print (field,"\n")
     while not field.get_result():
         field.minion_battle()
         field.renew_buff()
         field.do_deathrattle()
        # field.renew_buff()
         field.dump()
+       # print (field,"\n")
         field.remove_death()
         field.detect_death()
         field.renew_buff()
         #field.dump()
         field.renew_attack()
        # print ("a")
-       # print (field,"\n")
+        print (field,"c\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
-   # print (field.log)
+    #print (field.log)
+'''
+a=minion("Cave Hydra", 6, 18, ch="Beast", g=True,spe="Cave Hydra")
+b =minion("Cobalt Guardian", 6, 3,ch="Mech",sh=True, spe="Cobalt Guardian")
+c =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
+d =minion("Security Rover", 2, 6,ch="Mech",t=True, spe="Security Rover")
+e =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
+ba = battlefeild()
+ba.add_minion(a, "up", 0)
+ba.add_minion(b, "down", 0)
+ba.add_minion(c, "down", 1)
+ba.add_minion(d, "down", 2)
+ba.add_minion(e, "down", 3)
+battle(ba)
+'''
+

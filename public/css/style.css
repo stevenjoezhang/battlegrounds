@@ -114,6 +114,9 @@
 .minion.dying {
 	animation: exit 1.5s forwards;
 }
+.minion.before-summon {
+	display: none;
+}
 .minion.summon {
 	animation: summon 1.5s ease-out;
 }

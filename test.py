@@ -120,7 +120,7 @@ def test5():#检测爆爆，伯瓦尔互动
     return ba
 
 def test6():#检测零攻互动
-    a=minion("Kaboom Bot", 4, 12, ch="Mech", g=True,ra="Kaboom Bot")
+    a=minion("Kaboom Bot", 4, 12, ch="Mech", g=True,sh=True,ra="Kaboom Bot")
     b= minion("Murloc Tidehunter", 0, 6, ch="Murloc")
     c= minion("Murloc Tidehunter", 0, 6, ch="Murloc")
     d =minion("Bolvar, Fireblood", 0, 12, sh=True, spe="Bolvar, Fireblood")
@@ -167,4 +167,18 @@ def test7():#检测恐狼，土狼，喷子
     ba.add_minion(l, "down", 4)
     ba.add_minion(m, "down", 5)
     ba.add_minion(n, "down", 6)
+    return ba
+
+def test8():#检测爆爆，伯瓦尔互动
+    a=minion("Cave Hydra", 6, 18, ch="Beast", g=True,spe="Cave Hydra")
+    b =minion("Cobalt Guardian", 6, 3,ch="Mech",sh=True, spe="Cobalt Guardian")
+    c =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
+    d =minion("Security Rover", 2, 6,ch="Mech",t=True, spe="Security Rover")
+    e =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
+    ba = battlefeild()
+    ba.add_minion(a, "up", 0)
+    ba.add_minion(b, "down", 0)
+    ba.add_minion(c, "down", 1)
+    ba.add_minion(d, "down", 2)
+    ba.add_minion(e, "down", 3)
     return ba

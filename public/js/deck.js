@@ -32,7 +32,7 @@ function randId(db) {
 async function initBoard() {
 	window.database = await fetchDB("/data.json");
 	window.battle = await fetchDB("/battle.json");
-	["up", "down"].forEach(name => battle[0][0][name].forEach(prop => minions[prop.id] = new Minion(prop, name)));
+	["up", "down"].forEach(board => battle[0][0][board].forEach(prop => minions[prop.id] = new Minion(prop, board)));
 }
 
 function makeid(length) {
@@ -45,7 +45,7 @@ function makeid(length) {
 	return result;
 }
 
-function Minion(prop, name) {
+function Minion(prop, board, position) {
 	let index = database.findIndex(item => prop.name.toLowerCase() === item.name.toLowerCase());
 	//this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.prop.id));
 	this.data = database[index];
@@ -53,7 +53,6 @@ function Minion(prop, name) {
 	this.prop = {
 		attack: prop.atk,
 		health: prop.health,
-		belongsTo: ["up", "down"].indexOf(name),
 		id,
 		gid: prop.id,
 		poisonous: prop.poison,
@@ -61,10 +60,12 @@ function Minion(prop, name) {
 		taunt: prop.taunt,
 		golden: prop.golden,
 		source: prop.source,
-		position: prop.position
+		position
 	};
 	this.ele = document.createElement("div");
 	this.ele.setAttribute("gid", this.prop.gid);
+	this.belongsTo = ["up", "down"].indexOf(board);
+	this.parent = document.querySelectorAll(`.minions`)[this.belongsTo];
 	this.dead = false;
 	this.ele.insertAdjacentHTML("afterbegin", `
 			<div class="image art"></div>
@@ -79,11 +80,14 @@ function Minion(prop, name) {
 			<div class="text health">${this.prop.health}</div>
 			<div class="image shield"></div>
 			<div class="preview">
-				<img src="https://art.hearthstonejson.com/v1/render/latest/${"zhCN"}/256x/${this.prop.id}.png">
+				<img loading="lazy" src="https://art.hearthstonejson.com/v1/render/latest/${"zhCN"}/256x/${this.prop.id}.png">
 			</div>`);
 	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.prop.id}.jpg)`;
-	if (this.prop.position) document.querySelectorAll(`.minions`)[this.prop.belongsTo].children[this.prop.position].after(this.ele);
-	else document.querySelectorAll(`.minions`)[this.prop.belongsTo].appendChild(this.ele);
+	if (typeof this.prop.position === "number") {
+		if (this.prop.position === 0) this.parent.insertAdjacentElement("afterbegin", this.ele);
+		this.parent.children[this.prop.position - 1].after(this.ele);
+	}
+	else this.parent.appendChild(this.ele);
 	this.animationTimer = function(target, className) {
 		return new Promise(resolve => {
 			target.classList.add(className);
@@ -94,8 +98,13 @@ function Minion(prop, name) {
 			});
 		})
 	}
+	this.summon = function() {
+		this.ele.classList.remove("before-summon");
+		return this.animationTimer(this.ele, "summon");
+	}
 	this.initClassName = function() {
 		this.ele.classList.add("minion");
+		if (this.prop.source !== "origin") this.ele.classList.add("before-summon");
 		//if (this.data.goldenId === this.prop.id) this.ele.classList.add("golden");
 		if (this.prop.golden) this.ele.classList.add("golden");
 		if (this.data.divineShield) this.ele.classList.add("shield");
@@ -147,8 +156,8 @@ function Minion(prop, name) {
 		let deltaY = targetEle.getBoundingClientRect().y - this.ele.getBoundingClientRect().y;
 		//deltaX > 0 ? deltaX -= this.ele.offsetWidth / 3 : deltaX += this.ele.offsetWidth / 3;
 		//deltaY > 0 ? deltaY -= this.ele.offsetHeight / 3 : deltaY += this.ele.offsetHeight / 3;
-		document.querySelectorAll(".minions")[this.prop.belongsTo].style.cssText = "z-index: 100;";
-		document.querySelectorAll(".minions")[1 - this.prop.belongsTo].style.cssText = "z-index: 0;";
+		this.parent.style.cssText = "z-index: 100;";
+		document.querySelectorAll(".minions")[1 - this.belongsTo].style.cssText = "z-index: 0;";
 		console.log("STYLE", new Date().getSeconds(), new Date().getMilliseconds())
 		let rid = makeid(8);
 		document.getElementById("attack-style").innerHTML += `@keyframes attacking-${rid} {
@@ -180,7 +189,7 @@ function Minion(prop, name) {
 		console.log("ATK", new Date().getSeconds(), new Date().getMilliseconds())
 		return new Promise(resolve => {
 			setTimeout(() => {
-				this.animationTimer(document.querySelector(".section-decklist"), this.prop.belongsTo === 0 ? "shake-down" : "shake-up");
+				this.animationTimer(document.querySelector(".section-decklist"), this.belongsTo === 0 ? "shake-down" : "shake-up");
 				resolve();
 				console.log("RESOLVE", new Date().getSeconds(), new Date().getMilliseconds())
 				setTimeout(() => {
@@ -230,14 +239,12 @@ function Minion(prop, name) {
 			die: [],
 			summon: []
 		};
-		["up", "down"].forEach(name => {
-			result[name].forEach(target => {
+		["up", "down"].forEach(board => {
+			result[board].forEach((target, position) => {
 				let minion = minions[target.id];
 				if (!minion) {
-					minion = minions[target.id] = new Minion(target, name);
-					queue.summon.push(() => {
-						return minion.animationTimer(this.ele, "summon");
-					});
+					minion = minions[target.id] = new Minion(target, board, position);
+					queue.summon.push(() => minion.summon());
 					return;
 				}
 				queue.health.push(() => minion.setHealth(target.health));
