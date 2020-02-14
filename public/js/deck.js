@@ -8,7 +8,6 @@ function setSize() {
 setSize();
 window.addEventListener("resize", setSize);
 var minions = [];
-var gid = 0;
 
 function toggleMenu() {
 	let target = document.getElementById("menu");
@@ -47,24 +46,15 @@ function makeid(length) {
 
 function Minion(prop, board, position) {
 	let index = database.findIndex(item => prop.name.toLowerCase() === item.name.toLowerCase());
-	//this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.prop.id));
+	//this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.id));
 	this.data = database[index];
-	let id = (index !== -1) ? ((prop.golden && database[index].goldenId) ? database[index].goldenId : database[index].id) : "TB_BaconUps_038";
-	this.prop = {
-		attack: prop.atk,
-		health: prop.health,
-		id,
-		gid: prop.id,
-		poisonous: prop.poison,
-		shield: prop.shield,
-		taunt: prop.taunt,
-		golden: prop.golden,
-		source: prop.source,
-		position
-	};
+	this.id = (index !== -1) ? ((prop.golden && database[index].goldenId) ? database[index].goldenId : database[index].id) : "TB_BaconUps_038";
+	this.gid = prop.id;
+	this.prop = prop;
 	this.ele = document.createElement("div");
-	this.ele.setAttribute("gid", this.prop.gid);
+	this.ele.setAttribute("gid", this.gid);
 	this.belongsTo = ["up", "down"].indexOf(board);
+	this.position = position;
 	this.parent = document.querySelectorAll(`.minions`)[this.belongsTo];
 	this.dead = false;
 	this.ele.insertAdjacentHTML("afterbegin", `
@@ -80,12 +70,12 @@ function Minion(prop, board, position) {
 			<div class="text health">${this.prop.health}</div>
 			<div class="image shield"></div>
 			<div class="preview">
-				<img loading="lazy" src="https://art.hearthstonejson.com/v1/render/latest/${"zhCN"}/256x/${this.prop.id}.png">
+				<img loading="lazy" src="https://art.hearthstonejson.com/v1/render/latest/${"zhCN"}/256x/${this.id}.png">
 			</div>`);
-	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.prop.id}.jpg)`;
-	if (typeof this.prop.position === "number") {
-		if (this.prop.position === 0) this.parent.insertAdjacentElement("afterbegin", this.ele);
-		this.parent.children[this.prop.position - 1].after(this.ele);
+	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.id}.jpg)`;
+	if (typeof this.position === "number") {
+		if (this.position === 0) this.parent.insertAdjacentElement("afterbegin", this.ele);
+		this.parent.children[this.position - 1].after(this.ele);
 	}
 	else this.parent.appendChild(this.ele);
 	this.animationTimer = function(target, className) {
@@ -105,7 +95,7 @@ function Minion(prop, board, position) {
 	this.initClassName = function() {
 		this.ele.classList.add("minion");
 		if (this.prop.source !== "origin") this.ele.classList.add("before-summon");
-		//if (this.data.goldenId === this.prop.id) this.ele.classList.add("golden");
+		//if (this.data.goldenId === this.id) this.ele.classList.add("golden");
 		if (this.prop.golden) this.ele.classList.add("golden");
 		if (this.data.divineShield) this.ele.classList.add("shield");
 		if (this.data.cleave) this.ele.classList.add("trigger");
@@ -237,18 +227,22 @@ function Minion(prop, board, position) {
 		let queue = {
 			health: [],
 			die: [],
-			summon: []
+			summon: {
+				before: [],
+				after: []
+			}
 		};
 		["up", "down"].forEach(board => {
 			result[board].forEach((target, position) => {
 				let minion = minions[target.id];
 				if (!minion) {
 					minion = minions[target.id] = new Minion(target, board, position);
-					queue.summon.push(() => minion.summon());
+					if (["damage", "overkill"].includes(minion.prop.source)) queue.summon.before.push(() => minion.summon());
+					else queue.summon.after.push(() => minion.summon());
 					return;
 				}
 				queue.health.push(() => minion.setHealth(target.health));
-				queue.health.push(() => minion.setAttack(target.atk));
+				queue.health.push(() => minion.setAttack(target.attack));
 				queue.health.push(() => minion.setShield(target.shield));
 				if (target.death) queue.die.push(() => minion.die());
 			});
@@ -259,9 +253,10 @@ function Minion(prop, board, position) {
 				setTimeout(resolve, battle[3]);
 			});
 		}
-		await Promise.all(queue.die.map(ele => ele()));
 		await Promise.all(queue.health.map(ele => ele()));
-		await Promise.all(queue.summon.map(ele => ele()));
+		await Promise.all(queue.summon.before.map(ele => ele()));
+		await Promise.all(queue.die.map(ele => ele()));
+		await Promise.all(queue.summon.after.map(ele => ele()));
 	}
 })();
 
@@ -269,6 +264,8 @@ function Minion(prop, board, position) {
 document.querySelectorAll(".minion").forEach(ele => {
 	//ele,
 });
+
+//var gid = 0;
 	for (let i = 0; i < 7; i++) {
 		let prop = {
 			attack: 7,

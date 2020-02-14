@@ -769,11 +769,11 @@ class battlefeild:
             for minion in board:
                 current[name].append({
                     "id": id(minion),
-                    "atk": minion.get_calculated_attack(),
+                    "attack": minion.get_calculated_attack(),
                     "health": minion.get_calculated_health(),
                     "shield": minion.get_shield(),
                     "taunt": minion.get_taunt(),
-                    "poison": minion.get_poison(),
+                    "poisonous": minion.get_poison(),
                     "golden": minion.get_golden(),
                     "death": minion.get_rattle(),
                     "name": minion.get_name(),
