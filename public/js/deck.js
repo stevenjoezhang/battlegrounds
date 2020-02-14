@@ -54,7 +54,6 @@ function Minion(prop, board, position) {
 	this.ele = document.createElement("div");
 	this.ele.setAttribute("gid", this.gid);
 	this.belongsTo = ["up", "down"].indexOf(board);
-	this.position = position;
 	this.parent = document.querySelectorAll(`.minions`)[this.belongsTo];
 	this.dead = false;
 	this.ele.insertAdjacentHTML("afterbegin", `
@@ -73,9 +72,8 @@ function Minion(prop, board, position) {
 				<img loading="lazy" src="https://art.hearthstonejson.com/v1/render/latest/${"zhCN"}/256x/${this.id}.png">
 			</div>`);
 	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.id}.jpg)`;
-	if (typeof this.position === "number") {
-		if (this.position === 0) this.parent.insertAdjacentElement("afterbegin", this.ele);
-		this.parent.children[this.position - 1].after(this.ele);
+	if ((typeof position === "number") && (position < this.parent.querySelectorAll(".minion:not(.dying)").length)) {
+		this.parent.querySelectorAll(".minion:not(.dying)")[position].insertAdjacentElement("beforebegin", this.ele);
 	}
 	else this.parent.appendChild(this.ele);
 	this.animationTimer = function(target, className) {
@@ -132,7 +130,7 @@ function Minion(prop, board, position) {
 			this.ele.removeChild(animEle);
 		}, 2900);
 		return new Promise(resolve => {
-			setTimeout(resolve, 1500);
+			setTimeout(resolve, 1000);
 		});
 	}
 	this.setAttack = function(attack) {
@@ -252,62 +250,14 @@ function Minion(prop, board, position) {
 			});
 		});
 		if (attacking.length === 2) await minions[attacking[0]].doAttack(attacking[1]);
+		await Promise.all(queue.die.map(ele => ele()));
+		await Promise.all(queue.health.map(ele => ele()));
+		await Promise.all(queue.summon.before.map(ele => ele()));
+		await Promise.all(queue.summon.after.map(ele => ele()));
 		if (typeof battle[3] === "number") {
 			await new Promise(resolve => {
 				setTimeout(resolve, battle[3]);
 			});
 		}
-		await Promise.all(queue.health.map(ele => ele()));
-		await Promise.all(queue.summon.before.map(ele => ele()));
-		await Promise.all(queue.die.map(ele => ele()));
-		await Promise.all(queue.summon.after.map(ele => ele()));
 	}
 })();
-
-/*
-document.querySelectorAll(".minion").forEach(ele => {
-	//ele,
-});
-
-//var gid = 0;
-	for (let i = 0; i < 7; i++) {
-		let prop = {
-			attack: 7,
-			health: 10,
-			belongsTo: 0,
-			id: "TB_BaconUps_093",//randId(database),//"TB_BaconUps_080",
-			gid
-		}
-		let minion = new Minion(prop);
-		minions[gid++] = minion;
-	}
-	for (let i = 0; i < 7; i++) {
-		let prop = {
-			attack: 7,
-			health: 10,
-			belongsTo: 1,
-			id: "TB_BaconUps_093",//randId(database),//"TB_BaconUps_099",
-			gid
-		}
-		let minion = new Minion(prop);
-		minions[gid++] = minion;
-	}
-var queue = [
-	() => minions[0].doAttack(8),
-	[() => minions[8].setHealth(3), () => minions[0].setHealth(3)],
-	() => minions[0].doAttack(8),
-	[() => minions[8].setHealth(-4), () => minions[0].setHealth(-4)],
-	[() => minions[8].die(), () => minions[0].die()]
-];
-async function animation(queue) {
-	for (let anim of queue) {
-		if (typeof anim === "function") {
-			await anim();
-		} else {
-			await Promise.all(anim.map(ele => ele()));
-		}
-	}
-}
-
-animation(queue);
-*/
