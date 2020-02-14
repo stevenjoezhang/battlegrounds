@@ -53,7 +53,7 @@ def test1():#检测狂战，腐树，爆爆，老瞎眼
     ba.add_minion(n, "down", 6)
     return ba
 
-def test2():
+def test2():#检测buff和狂战
     a = minion("Foe Reaper 4000", 6, 16, spe="Foe Reaper 4000", g=True, ch="Mech")
     n = minion("Murloc Warleader", 12, 112,  ch="Murloc", spe="Murloc Warleader")
     ba = battlefeild()
@@ -107,7 +107,7 @@ def test4():#检测伯瓦尔，金爆爆
     ba.add_minion(n, "down", 6)
     return ba
 
-def test5():#检测爆爆，伯瓦尔互动
+def test5():#检测金爆爆，伯瓦尔互动
     a=minion("Kaboom Bot", 6, 6, ch="Mech", g=True,ra="Kaboom Bot")
     b= minion("Murloc Tidehunter", 6, 6, ch="Murloc")
     c= minion("Murloc Tidehunter", 5, 4, sh=True, ch="Murloc")
@@ -169,7 +169,7 @@ def test7():#检测恐狼，土狼，喷子
     ba.add_minion(n, "down", 6)
     return ba
 
-def test8():#检测爆爆，伯瓦尔互动
+def test8():#检测狂战，安保
     a=minion("Cave Hydra", 6, 18, ch="Beast", g=True,spe="Cave Hydra")
     b =minion("Cobalt Guardian", 6, 3,ch="Mech",sh=True, spe="Cobalt Guardian")
     c =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
@@ -183,37 +183,37 @@ def test8():#检测爆爆，伯瓦尔互动
     ba.add_minion(e, "down", 3)
     return ba
 
-def test9():
+def test9():#检测卡德加，学徒，安保
     a = minion("Cave Hydra", 6, 18, ch="Beast", g=True, spe="Cave Hydra")
     b = minion("Cobalt Guardian", 6, 3, ch="Mech", spe="Cobalt Guardian")
     c = minion("Security Rover", 2, 6, ch="Mech", spe="Security Rover")
     d = minion("Security Rover", 2, 6, ch="Mech", t=True, spe="Security Rover")
-    #e = minion("Security Rover", 2, 6, ch="Mech", spe="Security Rover")
+    e = minion("Kangor's Apprentice", 3, 6, ra="Kangor's Apprentice")
     f = minion("Khadgar", 2, 2, g=True, spe="Khadgar")
     ba = battlefeild()
     ba.add_minion(a, "up", 0)
     ba.add_minion(b, "down", 0)
     ba.add_minion(d, "down", 1)
     ba.add_minion(c, "down", 2)
-    # ba.add_minion(e, "down", 3)
+    ba.add_minion(e, "down", 3)
     ba.add_minion(f, "down", 4)
     return ba
 
-def test10():#检测伯瓦尔，金爆爆
-    a = minion("Foe Reaper 4000", 6, 6, spe="Foe Reaper 4000", g=True, ch="Mech")
-    b = minion("Kaboom Bot", 6, 10, ch="Mech", ra="Kaboom Bot")
-    c = minion("Kaboom Bot", 10, 11, ch="Mech", ra="Kaboom Bot")
-    d = minion("Kaboom Bot", 6, 11, ch="Mech", ra="Kaboom Bot")
-    e = minion("Kaboom Bot", 6, 16, ch="Mech", ra="Kaboom Bot")
-    f = minion("Baron Rivendare", 1, 7,  spe="Baron Rivendare")
-    g = minion("Kaboom Bot", 5, 12, sh=True, t=True, ch="Mech", ra="Kaboom Bot")
-    h = minion("Old Murk-Eye", 22, 6, sh=True, g=True, ch="Murloc", spe="Old Murk-Eye")
-    i =minion("Bolvar, Fireblood", 10, 12, sh=True, spe="Bolvar, Fireblood")
-    j = minion("Murloc Tidehunter", 8, 12, sh=True, ch="Murloc")
-    k = minion("Murloc Tidehunter", 8, 12, sh=True, ch="Murloc")
-    l = minion("Murloc Tidehunter", 12, 12, sh=True, ch="Murloc")
-    m = minion("Brann Bronzebeard", 4, 6, t=True)
-    n = minion("Murloc Warleader", 5, 12, sh=True, ch="Murloc", spe="Murloc Warleader")
+def test10():#检测爆爆互动
+    a = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    b = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    c = minion("Kaboom Bot", 10, 4, ch="Mech", ra="Kaboom Bot")
+    d = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    e = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    f = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    g = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    h = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    i = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    j = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    k = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    l = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    m = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    n = minion("Kaboom Bot", 6, 4, ch="Mech",g=True, ra="Kaboom Bot")
     ba = battlefeild()
     ba.add_minion(b, "up", 0)
     ba.add_minion(a, "up", 1)
@@ -230,3 +230,58 @@ def test10():#检测伯瓦尔，金爆爆
     ba.add_minion(m, "down", 5)
     ba.add_minion(n, "down", 6)
     return ba
+
+def test11():#检测爆爆亡语互动
+    a = minion("Harvest Golem", 6, 4, ch="Mech", ra="Harvest Golem")
+    b = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    ba = battlefeild()
+    ba.add_minion(a, "up", 0)
+    ba.add_minion(b, "down", 0)
+    return ba
+
+def test12():#检测爆爆亡语互动
+    a = minion("Harvest Golem", 6, 4, ch="Mech", ra="Harvest Golem")
+    b = minion("Harvest Golem", 6, 4, ch="Mech", ra="Harvest Golem")
+    c =minion("Harvest Golem", 6, 4, ch="Mech", ra="Harvest Golem")
+    d = minion("Harvest Golem", 6, 4, ch="Mech", ra="Harvest Golem")
+    e = minion("Harvest Golem", 6, 4, ch="Mech", ra="Harvest Golem")
+    f = minion("Harvest Golem", 6, 4, ch="Mech", ra="Harvest Golem")
+    g = minion("Harvest Golem", 6, 4, ch="Mech", ra="Harvest Golem")
+    h = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    i = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    j = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    k = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    l = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    m = minion("Kaboom Bot", 6, 4, ch="Mech", ra="Kaboom Bot")
+    n = minion("Kaboom Bot", 6, 4, ch="Mech",g=True, ra="Kaboom Bot")
+    ba = battlefeild()
+    ba.add_minion(b, "up", 0)
+    ba.add_minion(a, "up", 1)
+    ba.add_minion(c, "up", 2)
+    ba.add_minion(d, "up", 3)
+    ba.add_minion(e, "up", 4)
+    ba.add_minion(f, "up", 5)
+    ba.add_minion(g, "up", 6)
+    ba.add_minion(h, "down", 0)
+    ba.add_minion(i, "down", 1)
+    ba.add_minion(j, "down", 2)
+    ba.add_minion(k, "down", 3)
+    ba.add_minion(l, "down", 4)
+    ba.add_minion(m, "down", 5)
+    ba.add_minion(n, "down", 6)
+    return ba
+
+def test13():#检测卡德加，野兽，小妈/熊妈
+    a = minion("Cave Hydra", 6, 18, ch="Beast", g=True, spe="Cave Hydra")
+    b = minion("Kindly Grandmother", 6, 3, ch="Beast", ra="Kindly Grandmother")
+    c = minion("Pack Leader", 3, 3, spe="Pack Leader")
+    d =  minion("Khadgar", 2, 2,  spe="Khadgar")
+    e = minion("Khadgar", 2, 2,  spe="Khadgar")
+    ba = battlefeild()
+    ba.add_minion(a, "up", 0)
+    ba.add_minion(b, "down", 0)
+    ba.add_minion(c, "down", 1)
+    ba.add_minion(d, "down", 2)
+    ba.add_minion(e, "down", 3)
+    return ba
+

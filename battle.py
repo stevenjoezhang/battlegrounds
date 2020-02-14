@@ -1,11 +1,11 @@
 import random
 import database
+import itertools
 ch_list=("Beast","Murloc","Mech","Demon","All")
 special_list=("Dire Wolf Alpha","Murloc Warleader","Phalanx Commander","Siegebreaker","Mal'Ganis","Old Murk-Eye",\
               "Zapp Slywick","Foe Reaper 4000","Cave Hydra","Ironhide Direhorn","The Boogeymonster",\
-              "Festeroot Hulk","Bolvar, Fireblood","Scavenging Hyena","Junkbot", "Soul Juggler","Kaboom Bot", \
-              "Baron Rivendare","Fiendish Servant","Selfless Hero","Spawn of N'Zoth","Tortollan Shellraiser", \
-              "King Bagurgle","Goldrinn, the Great Wolf")
+              "Festeroot Hulk","Bolvar, Fireblood","Scavenging Hyena","Junkbot", "Soul Juggler", \
+              "Baron Rivendare","Cobalt Guardian","Murloc Tidecaller","Khadgar", "Mama Bear","Pack Leader",)
 #m_b_list=("Dire Wolf Alpha","Murloc Warleader","Phalanx Commander","Siegebreaker","Mal'Ganis","Old Murk-Eye")
 #d_s_list=("Mecharoo","")
 
@@ -30,7 +30,9 @@ class minion:
         self.deathrattle=ra
         self.rattle=False
         self.source="origin"
+        self.id = next(self.id_iter)
 
+    id_iter = itertools.count()
     def set_attack(self,at):
         self.attack+=at
         if self.attack<0:
@@ -412,7 +414,7 @@ def single_minion_battle(m,m_lst):
             if temp[i] == min1:
                 temp1.append(i)  #记录所有最低攻对应的序号
         aim = random.choice(temp1)
-        be_attack=id(m_lst[aim])
+        be_attack=m_lst[aim].id
         flag=m_lst[aim].get_shield()
         usual_minion_battle(m,m_lst[aim])
         if flag:
@@ -421,7 +423,7 @@ def single_minion_battle(m,m_lst):
            after_injury(m_lst,aim)
     elif (m.get_special() in ["Foe Reaper 4000","Cave Hydra"]):
         aim =select_minion(m_lst)
-        be_attack=id(m_lst[aim])
+        be_attack=m_lst[aim].id
         minionlist = len(m_lst)
    #     if aim !=-1:
         if minionlist == 1:
@@ -478,7 +480,7 @@ def single_minion_battle(m,m_lst):
         m.set_move(2)
     elif m.get_special() == "The Boogeymonster":
         aim = select_minion(m_lst)
-        be_attack=id(m_lst[aim])
+        be_attack=m_lst[aim].id
        # if aim!=-1:
         flag=m_lst[aim].get_shield()
         usual_minion_battle(m,m_lst[aim])
@@ -495,7 +497,7 @@ def single_minion_battle(m,m_lst):
                 m.set_attack(2)
     elif m.get_special() == "Ironhide Direhorn":
         aim = select_minion(m_lst)
-        be_attack=id(m_lst[aim])
+        be_attack=m_lst[aim].id
       #  if aim!=-1:
         flag=m_lst[aim].get_shield()
         usual_minion_battle(m,m_lst[aim])
@@ -507,7 +509,7 @@ def single_minion_battle(m,m_lst):
            after_injury(m_lst,aim)
     else:
         aim = select_minion(m_lst)
-        be_attack=id(m_lst[aim])
+        be_attack=m_lst[aim].id
        # if aim!=-1:
         flag=m_lst[aim].get_shield()
         usual_minion_battle(m,m_lst[aim])
@@ -524,8 +526,7 @@ def after_attack(lst):
                 i.set_attack(2)
             else:
                 i.set_attack(1)
-def after_death(dead,lst,lst2):#lst己方，lst2对方
-    ch=dead.get_character()
+def after_death(ch,lst,lst2):#lst己方，lst2对方
     if ch in ["Beast","All"]:
         for i in lst:
             if i.get_special() == "Scavenging Hyena" and (not i.get_death()):
@@ -579,15 +580,15 @@ def summon_buff(minion1,lst):
             if j.get_special()=="Mama Bear" and(not j.get_death()):
                 if j.get_golden():
                     minion1.set_health(8)
-                    minion1.set_attach(8)
+                    minion1.set_attack(8)
                 else:
                     minion1.set_health(4)
-                    minion1.set_attach(4)
+                    minion1.set_attack(4)
             elif j.get_special()=="Pack Leader" and(not j.get_death()):
                 if j.get_golden():
-                    minion1.set_attach(6)
+                    minion1.set_attack(6)
                 else:
-                    minion1.set_attach(3)
+                    minion1.set_attack(3)
 def duplicate(lst):
     times=0
     num=0
@@ -687,15 +688,13 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
                 i.set_attack(buff)
                 i.set_health(buff)
     elif name=="Mecharoo":
-        if pos<7:
-            summon("Jo-E Bot",dead.get_move(),pos,lst1,"deathrattle",dead.get_golden())
+        summon("Jo-E Bot",dead.get_move(),pos,lst1,"deathrattle",dead.get_golden())
     elif name == "Kindly Grandmother":
-        if pos<7:
-            summon("Big Bad Wolf", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
+        summon("Big Bad Wolf", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
     elif name=="Mounted Raptor":
         times=2 if dead.get_golden() else 1
         i=0
-        while i<times and pos<7:
+        while i<times and alive_num(lst1)<7:
             temp=len(lst1)
             name=random.choice(database.get_minions_by_cost(1))["name"]
             summon(name,dead.get_move(),pos,lst1,"deathrattle",False)
@@ -704,29 +703,26 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
     elif name == "Rat Pack":
         times=dead.get_calculated_attack()
         i = 0
-        while i < times and pos < 7:
+        while i < times and alive_num(lst1)<7:
             temp=len(lst1)
             summon("Rat", dead.get_move(), pos+i, lst1, "deathrattle", dead.get_golden())
             pos += len(lst1) - temp
             i+=1
     elif name=="Harvest Golem":
-        if pos<7:
-            summon("Damaged Golem",dead.get_move(),pos,lst1,"deathrattle",dead.get_golden())
+        summon("Damaged Golem",dead.get_move(),pos,lst1,"deathrattle",dead.get_golden())
     elif name == "Imprisoner":
-        if pos<7:
-            summon("Imp", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
+        summon("Imp", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
     elif  name == "The Beast":
         summon("Finkle Einhorn",0, len(lst2), lst2, "deathrattle", False)
     elif name == "Infested Wolf":
-        if pos<7:
-            temp = len(lst1)
-            summon("Spider", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
-            pos += len(lst1) - temp
-            summon("Spider", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
+        temp = len(lst1)
+        summon("Spider", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
+        pos += len(lst1) - temp
+        summon("Spider", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
     elif name=="Piloted Shredder":
         times = 2 if dead.get_golden() else 1
         i = 0
-        while i < times and pos < 7:
+        while i < times and alive_num(lst1)<7:
             temp = len(lst1)
             name = random.choice(database.get_minions_by_cost(2))["name"]
             summon(name, dead.get_move(), pos, lst1, "deathrattle", False)
@@ -735,7 +731,7 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
     elif name=="Piloted Sky Golem":
         times = 2 if dead.get_golden() else 1
         i = 0
-        while i < times and pos < 7:
+        while i < times and alive_num(lst1)<7:
             temp = len(lst1)
             name = random.choice(database.get_minions_by_cost(4))["name"]
             summon(name, dead.get_move(), pos, lst1, "deathrattle", False)
@@ -744,18 +740,17 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
     elif name == "Replicating Menace":
         times = 3
         i = 0
-        while i < times and pos < 7:
+        while i < times and alive_num(lst1)<7:
             temp = len(lst1)
             summon("Microbot", dead.get_move(), pos + i, lst1, "deathrattle", dead.get_golden())
             pos += len(lst1) - temp
             i += 1
     elif name == "Mechano-Egg":
-        if pos < 7:
-            summon("Robosaur", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
+        summon("Robosaur", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
     elif name == "Savannah Highmane":
         times = 2
         i = 0
-        while i < times and pos < 7:
+        while i < times and alive_num(lst1)<7:
             temp = len(lst1)
             summon("Hyena", dead.get_move(), pos + i, lst1, "deathrattle", dead.get_golden())
             pos += len(lst1) - temp
@@ -763,7 +758,7 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
     elif name == "Sated Threshadon":
         times = 3
         i = 0
-        while i < times and pos < 7:
+        while i < times and alive_num(lst1)<7:
             temp = len(lst1)
             summon("Primalfin", dead.get_move(), pos + i, lst1, "deathrattle", dead.get_golden())
             pos += len(lst1) - temp
@@ -771,7 +766,7 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
     elif name == "Voidlord":
         times = 3
         i = 0
-        while i < times and pos < 7:
+        while i < times and alive_num(lst1)<7:
             temp = len(lst1)
             summon("Voidwalker", dead.get_move(), pos + i, lst1, "deathrattle", dead.get_golden())
             pos += len(lst1) - temp
@@ -779,7 +774,7 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
     elif name == "Sneed's Old Shredder":
         times = 2 if dead.get_golden() else 1
         i = 0
-        while i < times and pos < 7:
+        while i < times and alive_num(lst1)<7:
             temp = len(lst1)
             name = random.choice(database.get_legendary_minions())["name"]
             summon(name, dead.get_move(), pos, lst1, "deathrattle", False)
@@ -788,7 +783,7 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
     elif name=="Ghastcoiler":
         times = 4 if dead.get_golden() else 2
         i = 0
-        while i < times and pos < 7:
+        while i < times and alive_num(lst1)<7:
             temp = len(lst1)
             name = random.choice(database.get_deathrattle_minions())["name"]
             summon(name, dead.get_move(), pos, lst1, "deathrattle", False)
@@ -872,7 +867,7 @@ class battlefeild:
         for [name, board] in [["up", self.up], ["down", self.down]]:
             for minion in board:
                 current[name].append({
-                    "id": id(minion),
+                    "id": minion.id,
                     "attack": minion.get_calculated_attack(),
                     "health": minion.get_calculated_health(),
                     "shield": minion.get_shield(),
@@ -1005,7 +1000,7 @@ class battlefeild:
                     damage2=self.up[pos].get_damage()
                     if Flag and (not self.up[pos].get_shield()):
                         lose_shield(self.up,1)
-                    attack_state.append(id(self.up[pos]))
+                    attack_state.append(self.up[pos].id)
                     attack_state.append(temp[1])
                     self.set_attack_time()
                     self.add_already_attack()
@@ -1027,7 +1022,7 @@ class battlefeild:
                     damage2 = self.down[pos].get_damage()
                     if Flag and (not self.down[pos].get_shield()):
                         lose_shield(self.down,1)
-                    attack_state.append(id(self.down[pos]))
+                    attack_state.append(self.down[pos].id)
                     attack_state.append(temp[1])
                     self.set_attack_time()
                     self.add_already_attack()
@@ -1045,91 +1040,93 @@ class battlefeild:
 
     def do_deathrattle(self):
         if not self.attack_flag:
-            pos_up,pos_down=-1,-1
+            pos_up,pos_down=0,0
+            dead_up=[]
+            dead_down=[]
             for i in range(len(self.up)):
                 if self.up[i].get_death():
                     self.up[i].set_rattle(True)
-                    if pos_up==-1:
-                        pos_up=i
+                    dead_up.append(i)
+                    if self.up[i].get_character() == "Mech" and len(self.mech_up) < 2:
+                        self.mech_up.append(self.up[i].get_name())
             for i in range(len(self.down)):
                 if self.down[i].get_death():
                     self.down[i].set_rattle(True)
-                    if pos_down == -1:
-                        pos_down = i
+                    dead_down.append(i)
+                    if self.down[i].get_character() == "Mech" and len(self.mech_down) < 2:
+                        self.mech_down.append(self.down[i].get_name())
             if self.begin:
                 times = deathrattle_time(self.up)
-                dead = list(filter(lambda x: x.get_rattle(), self.up))
-                for i in dead:
-                    deathrattle_lst = i.get_deathrattle().split("+")
+                for i in dead_up:
+                    deathrattle_lst = self.up[i+pos_up].get_deathrattle().split("+")
                     if deathrattle_lst[0]:
                         for j in deathrattle_lst:
                             for k in range(times):
-                                if j == "Kangor's Apprentice" and pos_up<7:
+                                if j == "Kangor's Apprentice" and alive_num(self.up)<7:
                                     for l in self.mech_up:
                                         temp = len(self.up)
-                                        summon(l,i.get_move(),pos_down,self.up,"deathrattle",i.get_golden())
-                                        pos_down += len(self.up) - temp
+                                        summon(l,self.up[i+pos_up].get_move(),i+pos_up,self.up,"deathrattle",self.up[i+pos_up].get_golden())
+                                        pos_up += len(self.up) - temp
                                 else:
                                     temp=len(self.up)
-                                    single_deathrattle(j,i,self.up,self.down,pos_up)
+                                    single_deathrattle(j,self.up[i+pos_up],self.up,self.down,i+pos_up)
                                     pos_up+=len(self.up)-temp
                                     self.renew_buff()
-                    after_death(i,self.up,self.down)
+                    after_death(self.up[i+pos_up].get_character(),self.up,self.down)
                 times=deathrattle_time(self.down)
-                dead = list(filter(lambda x: x.get_rattle(), self.down))
-                for i in dead:
-                    deathrattle_lst = i.get_deathrattle().split("+")
+                for i in dead_down:
+                    deathrattle_lst = self.down[i+pos_down].get_deathrattle().split("+")
                     if deathrattle_lst[0]:
                         for j in deathrattle_lst:
                             for k in range(times):
-                                if j == "Kangor's Apprentice" and pos_down<7:
+                                if j == "Kangor's Apprentice" and alive_num(self.down)<7:
                                     for l in self.mech_down:
                                         temp = len(self.down)
-                                        summon(l,i.get_move(),pos_down,self.down,"deathrattle",i.get_golden())
+                                        summon(l,self.down[i+pos_down].get_move(),i+pos_down,self.down,"deathrattle",self.down[i+pos_down].get_golden())
                                         pos_down += len(self.down) - temp
                                 else:
                                     temp = len(self.down)
-                                    single_deathrattle(j, i, self.down, self.up,pos_down)
+                                    single_deathrattle(j, self.down[i+pos_down], self.down, self.up,i+pos_down)
                                     pos_down += len(self.down) - temp
                                     self.renew_buff()
-                    after_death(i, self.down, self.up)
+                    after_death(self.down[i+pos_down].get_character(), self.down, self.up)
             else:
                 times = deathrattle_time(self.down)
-                dead = list(filter(lambda x: x.get_rattle(), self.down))
-                for i in dead:
-                    deathrattle_lst = i.get_deathrattle().split("+")
+                for i in dead_down:
+                    deathrattle_lst = self.down[i + pos_down].get_deathrattle().split("+")
                     if deathrattle_lst[0]:
                         for j in deathrattle_lst:
                             for k in range(times):
-                                if j == "Kangor's Apprentice" and pos_down < 7:
+                                if j == "Kangor's Apprentice" and alive_num(self.down) < 7:
                                     for l in self.mech_down:
                                         temp = len(self.down)
-                                        summon(l, i.get_move(), pos_down, self.down, "deathrattle", i.get_golden())
+                                        summon(l, self.down[i + pos_down].get_move(), i + pos_down, self.down,
+                                               "deathrattle", self.down[i + pos_down].get_golden())
                                         pos_down += len(self.down) - temp
                                 else:
                                     temp = len(self.down)
-                                    single_deathrattle(j, i, self.down, self.up, pos_down)
+                                    single_deathrattle(j, self.down[i + pos_down], self.down, self.up, i + pos_down)
                                     pos_down += len(self.down) - temp
                                     self.renew_buff()
-                    after_death(i, self.down, self.up)
+                    after_death(self.down[i + pos_down].get_character(), self.down, self.up)
                 times = deathrattle_time(self.up)
-                dead = list(filter(lambda x: x.get_rattle(), self.up))
-                for i in dead:
-                    deathrattle_lst = i.get_deathrattle().split("+")
+                for i in dead_up:
+                    deathrattle_lst = self.up[i + pos_up].get_deathrattle().split("+")
                     if deathrattle_lst[0]:
                         for j in deathrattle_lst:
                             for k in range(times):
-                                if j == "Kangor's Apprentice" and pos_up < 7:
+                                if j == "Kangor's Apprentice" and alive_num(self.up) < 7:
                                     for l in self.mech_up:
                                         temp = len(self.up)
-                                        summon(l, i.get_move(), pos_down, self.up, "deathrattle", i.get_golden())
-                                        pos_down += len(self.up) - temp
+                                        summon(l, self.up[i + pos_up].get_move(), i + pos_up, self.up, "deathrattle",
+                                               self.up[i + pos_up].get_golden())
+                                        pos_up += len(self.up) - temp
                                 else:
                                     temp = len(self.up)
-                                    single_deathrattle(j, i, self.up, self.down, pos_up)
+                                    single_deathrattle(j, self.up[i + pos_up], self.up, self.down, i + pos_up)
                                     pos_up += len(self.up) - temp
                                     self.renew_buff()
-                    after_death(i, self.up, self.down)
+                    after_death(self.up[i + pos_up].get_character(), self.up, self.down)
 
     def detect_death(self):
         Flag=True
@@ -1138,15 +1135,12 @@ class battlefeild:
                 i.set_death(True)
                 self.set_dead_minion(True)
                 Flag=False
-                if i.get_character()=="Mech" and len(self.mech_up)<2:
-                    self.mech_up.append(i.get_name())
+
         for j in self.down:
             if j.get_damage()>= (j.get_health()+j.get_buff_health()):
                 j.set_death(True)
                 self.set_dead_minion(True)
                 Flag=False
-                if i.get_character()=="Mech" and len(self.mech_down)<2:
-                    self.mech_down.append(i.get_name())
         if Flag:
             self.set_dead_minion(False)
 
