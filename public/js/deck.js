@@ -21,7 +21,7 @@ function toggleConsole() {
 async function fetchDB(file) {
 	let response = await fetch(file);
 	let data = await response.json();
-	console.log(data)
+	console.log(data);
 	return data;
 }
 function randId(db) {
@@ -150,7 +150,6 @@ function Minion(prop, board, position) {
 		//deltaY > 0 ? deltaY -= this.ele.offsetHeight / 3 : deltaY += this.ele.offsetHeight / 3;
 		this.parent.style.cssText = "z-index: 100;";
 		document.querySelectorAll(".minions")[1 - this.belongsTo].style.cssText = "z-index: 0;";
-		console.log("STYLE", new Date().getSeconds(), new Date().getMilliseconds())
 		let rid = makeid(8);
 		document.getElementById("attack-style").innerHTML += `@keyframes attacking-${rid} {
 				0% {
@@ -178,15 +177,10 @@ function Minion(prop, board, position) {
 			}
 			`;
 		this.animationTimer(this.ele, `attacking-${rid}`);
-		console.log("ATK", new Date().getSeconds(), new Date().getMilliseconds())
 		return new Promise(resolve => {
 			setTimeout(() => {
 				this.animationTimer(document.querySelector(".section-decklist"), this.belongsTo === 0 ? "shake-down" : "shake-up");
 				resolve();
-				console.log("RESOLVE", new Date().getSeconds(), new Date().getMilliseconds())
-				setTimeout(() => {
-					console.log("STOP", new Date().getSeconds(), new Date().getMilliseconds())
-				}, 500);
 			}, 500);
 		});
 	}
