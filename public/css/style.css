@@ -96,8 +96,8 @@
 .minion.trigger .trigger {
 	background-image: url(/img/trigger.png);
 }
-.minion.poison .poison {
-	background-image: url(/img/poison.png);
+.minion.poisonous .poisonous {
+	background-image: url(/img/poisonous.png);
 }
 .minion.shield .shield, .minion.lose-shield .shield {
 	background-image: url(/img/divine-shield.png);

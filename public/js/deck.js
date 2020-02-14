@@ -64,7 +64,7 @@ function Minion(prop, board, position) {
 			<div class="image legendary"></div>
 			<div class="image deathrattle"></div>
 			<div class="image trigger"></div>
-			<div class="image poison"></div>
+			<div class="image poisonous"></div>
 			<div class="image atk-health"></div>
 			<div class="text attack">${this.prop.attack}</div>
 			<div class="text health">${this.prop.health}</div>
@@ -136,8 +136,12 @@ function Minion(prop, board, position) {
 		});
 	}
 	this.setAttack = function(attack) {
+		let deltaAttack = attack - this.prop.attack;
 		this.prop.attack = attack;
 		this.ele.querySelector(".text.attack").innerText = this.prop.attack;
+		if (deltaAttack !== 0) {
+			this.animationTimer(this.ele.querySelector(".attack"), "text-splat");
+		}
 	}
 	this.doAttack = function(target) {
 		if (this.dead) return;
@@ -241,9 +245,9 @@ function Minion(prop, board, position) {
 					else queue.summon.after.push(() => minion.summon());
 					return;
 				}
-				queue.health.push(() => minion.setHealth(target.health));
-				queue.health.push(() => minion.setAttack(target.attack));
 				queue.health.push(() => minion.setShield(target.shield));
+				queue.health.push(() => minion.setAttack(target.attack));
+				queue.health.push(() => minion.setHealth(target.health));
 				if (target.death) queue.die.push(() => minion.die());
 			});
 		});

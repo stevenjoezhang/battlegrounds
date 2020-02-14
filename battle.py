@@ -573,7 +573,6 @@ def after_injury(lst,pos):
     else:
         pass
 
-
 def summon_buff(minion1,lst):
     if minion1.get_character()=="Beast":
         for j in lst:
@@ -635,7 +634,7 @@ def select_undead(lst):
     else:
         return -1
 
-def single_deathrattle(name,dead,lst1):
+def single_deathrattle(name,dead,lst1,lst2):
     if name == "Kaboom Bot":
         times=2 if dead.get_golden() else 1
         for j in range(times):
@@ -1190,24 +1189,24 @@ def battle(field):
     field.battle_begin()
     field.dump()
     field.check_state()
-    print (field,"\n")
+   # print (field,"\n")
     while not field.get_result():
         field.minion_battle()
         field.renew_buff()
         field.do_deathrattle()
        # field.renew_buff()
         field.dump()
-        print (field,"\n")
+       # print (field,"\n")
         field.remove_death()
         field.detect_death()
         field.renew_buff()
         #field.dump()
         field.renew_attack()
        # print ("a")
-        print (field,"c\n")
+       # print (field,"c\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
     #print (field.log)
-#'''
+'''
 a=minion("Cave Hydra", 6, 18, ch="Beast", g=True,spe="Cave Hydra")
 b =minion("Cobalt Guardian", 6, 3,ch="Mech", spe="Cobalt Guardian")
 c =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
