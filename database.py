@@ -26,15 +26,19 @@ def get_minions_by_tribe(name):
   return list(filter(lambda x: x['tribe'] ==name , database))
 def get_uncollect_minions():
   return list(filter(lambda x: x['isBaconPoolMinion'] == False, database))
-
+def get_names():
+  lst=list(filter(lambda x: x['isBaconPoolMinion'] == True , database))
+  lst1=[]
+  for i in lst:
+    lst1.append(i["name"])
+  return lst1
 '''
 #start_time = time.time()
-lst= get_legendary_minions()
+lst= get_names()
 lst1=get_uncollect_minions()
 #end_time = time.time()
 #print (end_time-start_time)
-for i in lst:
-  print (i)
+print (lst)
 print ("\n")
 for i in lst1:
   print (i)

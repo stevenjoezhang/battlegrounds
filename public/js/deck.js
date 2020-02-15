@@ -84,7 +84,7 @@ function Minion(prop, board, position) {
 				target.removeEventListener("animationend", listener);
 				resolve();
 			});
-		})
+		});
 	}
 	this.summon = function() {
 		this.ele.classList.remove("before-summon");

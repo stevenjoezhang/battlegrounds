@@ -5,7 +5,8 @@ ch_list=("Beast","Murloc","Mech","Demon","All")
 special_list=("Dire Wolf Alpha","Murloc Warleader","Phalanx Commander","Siegebreaker","Mal'Ganis","Old Murk-Eye",\
               "Zapp Slywick","Foe Reaper 4000","Cave Hydra","Ironhide Direhorn","The Boogeymonster",\
               "Festeroot Hulk","Bolvar, Fireblood","Scavenging Hyena","Junkbot", "Soul Juggler", \
-              "Baron Rivendare","Cobalt Guardian","Murloc Tidecaller","Khadgar", "Mama Bear","Pack Leader",)
+              "Baron Rivendare","Cobalt Guardian","Murloc Tidecaller","Khadgar", "Mama Bear","Pack Leader",\
+              "Security Rover","Imp Gang Boss")
 #m_b_list=("Dire Wolf Alpha","Murloc Warleader","Phalanx Commander","Siegebreaker","Mal'Ganis","Old Murk-Eye")
 #d_s_list=("Mecharoo","")
 
@@ -604,7 +605,7 @@ def duplicate(lst):
 
 def set_minion(temp,attack_state,golden):#从database的dictionary形式变成minion类
     num=2 if golden else 1
-    a=minion(na=temp["name"],at=temp["atk"]*num,he=temp["health"]*num,ch=temp["tribe"],t=temp["taunt"],sh=temp["divineShield"],p=temp["poisonous"],w=2 if temp["windfury"] else 1)
+    a=minion(na=temp["name"],at=temp["atk"]*num,he=temp["health"]*num,ch=temp["tribe"],t=temp["taunt"],sh=temp["divineShield"],p=temp["poisonous"],w=2 if temp["windfury"] else 1,g=golden)
     if temp["name"] in special_list:
         a.set_special(temp["name"])
     if attack_state==1:
@@ -705,7 +706,7 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
         i = 0
         while i < times and alive_num(lst1)<7:
             temp=len(lst1)
-            summon("Rat", dead.get_move(), pos+i, lst1, "deathrattle", dead.get_golden())
+            summon("Rat", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
             pos += len(lst1) - temp
             i+=1
     elif name=="Harvest Golem":
@@ -742,7 +743,15 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
         i = 0
         while i < times and alive_num(lst1)<7:
             temp = len(lst1)
-            summon("Microbot", dead.get_move(), pos + i, lst1, "deathrattle", dead.get_golden())
+            summon("Microbot", dead.get_move(), pos, lst1, "deathrattle", False)
+            pos += len(lst1) - temp
+            i += 1
+    elif name == "Replicating Menace golden":
+        times = 3
+        i = 0
+        while i < times and alive_num(lst1)<7:
+            temp = len(lst1)
+            summon("Microbot", dead.get_move(), pos, lst1, "deathrattle", True)
             pos += len(lst1) - temp
             i += 1
     elif name == "Mechano-Egg":
@@ -752,7 +761,7 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
         i = 0
         while i < times and alive_num(lst1)<7:
             temp = len(lst1)
-            summon("Hyena", dead.get_move(), pos + i, lst1, "deathrattle", dead.get_golden())
+            summon("Hyena", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
             pos += len(lst1) - temp
             i += 1
     elif name == "Sated Threshadon":
@@ -760,7 +769,7 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
         i = 0
         while i < times and alive_num(lst1)<7:
             temp = len(lst1)
-            summon("Primalfin", dead.get_move(), pos + i, lst1, "deathrattle", dead.get_golden())
+            summon("Primalfin", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
             pos += len(lst1) - temp
             i += 1
     elif name == "Voidlord":
@@ -768,7 +777,7 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
         i = 0
         while i < times and alive_num(lst1)<7:
             temp = len(lst1)
-            summon("Voidwalker", dead.get_move(), pos + i, lst1, "deathrattle", dead.get_golden())
+            summon("Voidwalker", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
             pos += len(lst1) - temp
             i += 1
     elif name == "Sneed's Old Shredder":
@@ -1004,12 +1013,12 @@ class battlefeild:
                     attack_state.append(temp[1])
                     self.set_attack_time()
                     self.add_already_attack()
-                    self.detect_death()
                     self.attack_flag=True
                     if temp[0]:
                         summon("Ironhide Runt", 0, pos + 1, self.up, "overkill", self.up[pos].get_golden())
                     if damage2-damage1>0:
                         after_injury(self.up,pos)
+                    self.detect_death()
                     after_attack(self.up)
                 if pos !=-1:
                     if self.up[pos].get_death():
@@ -1026,12 +1035,12 @@ class battlefeild:
                     attack_state.append(temp[1])
                     self.set_attack_time()
                     self.add_already_attack()
-                    self.detect_death()
                     self.attack_flag = True
                     if temp[0]:
                         summon("Ironhide Runt", 0, pos + 1, self.down, "overkill", self.down[pos].get_golden())
                     if damage2-damage1>0:
                         after_injury(self.down,pos)
+                    self.detect_death()
                     after_attack(self.down)
                 if pos!=-1:
                     if self.down[pos].get_death():
@@ -1065,11 +1074,11 @@ class battlefeild:
                                 if j == "Kangor's Apprentice" and alive_num(self.up)<7:
                                     for l in self.mech_up:
                                         temp = len(self.up)
-                                        summon(l,self.up[i+pos_up].get_move(),i+pos_up,self.up,"deathrattle",self.up[i+pos_up].get_golden())
+                                        summon(l,self.up[i+pos_up].get_move(),i+pos_up+1,self.up,"deathrattle",self.up[i+pos_up].get_golden())
                                         pos_up += len(self.up) - temp
                                 else:
                                     temp=len(self.up)
-                                    single_deathrattle(j,self.up[i+pos_up],self.up,self.down,i+pos_up)
+                                    single_deathrattle(j,self.up[i+pos_up],self.up,self.down,i+pos_up+1)
                                     pos_up+=len(self.up)-temp
                                     self.renew_buff()
                     after_death(self.up[i+pos_up].get_character(),self.up,self.down)
@@ -1082,11 +1091,11 @@ class battlefeild:
                                 if j == "Kangor's Apprentice" and alive_num(self.down)<7:
                                     for l in self.mech_down:
                                         temp = len(self.down)
-                                        summon(l,self.down[i+pos_down].get_move(),i+pos_down,self.down,"deathrattle",self.down[i+pos_down].get_golden())
+                                        summon(l,self.down[i+pos_down].get_move(),i+pos_down+1,self.down,"deathrattle",self.down[i+pos_down].get_golden())
                                         pos_down += len(self.down) - temp
                                 else:
                                     temp = len(self.down)
-                                    single_deathrattle(j, self.down[i+pos_down], self.down, self.up,i+pos_down)
+                                    single_deathrattle(j, self.down[i+pos_down], self.down, self.up,i+pos_down+1)
                                     pos_down += len(self.down) - temp
                                     self.renew_buff()
                     after_death(self.down[i+pos_down].get_character(), self.down, self.up)
@@ -1100,12 +1109,12 @@ class battlefeild:
                                 if j == "Kangor's Apprentice" and alive_num(self.down) < 7:
                                     for l in self.mech_down:
                                         temp = len(self.down)
-                                        summon(l, self.down[i + pos_down].get_move(), i + pos_down, self.down,
+                                        summon(l, self.down[i + pos_down].get_move(), i + pos_down+1, self.down,
                                                "deathrattle", self.down[i + pos_down].get_golden())
                                         pos_down += len(self.down) - temp
                                 else:
                                     temp = len(self.down)
-                                    single_deathrattle(j, self.down[i + pos_down], self.down, self.up, i + pos_down)
+                                    single_deathrattle(j, self.down[i + pos_down], self.down, self.up, i + pos_down+1)
                                     pos_down += len(self.down) - temp
                                     self.renew_buff()
                     after_death(self.down[i + pos_down].get_character(), self.down, self.up)
@@ -1118,12 +1127,12 @@ class battlefeild:
                                 if j == "Kangor's Apprentice" and alive_num(self.up) < 7:
                                     for l in self.mech_up:
                                         temp = len(self.up)
-                                        summon(l, self.up[i + pos_up].get_move(), i + pos_up, self.up, "deathrattle",
+                                        summon(l, self.up[i + pos_up].get_move(), i + pos_up+1, self.up, "deathrattle",
                                                self.up[i + pos_up].get_golden())
                                         pos_up += len(self.up) - temp
                                 else:
                                     temp = len(self.up)
-                                    single_deathrattle(j, self.up[i + pos_up], self.up, self.down, i + pos_up)
+                                    single_deathrattle(j, self.up[i + pos_up], self.up, self.down, i + pos_up+1)
                                     pos_up += len(self.up) - temp
                                     self.renew_buff()
                     after_death(self.up[i + pos_up].get_character(), self.up, self.down)

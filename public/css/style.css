@@ -34,7 +34,6 @@
 	height: 16%;
 	left: 9%;
 	display: flex;
-	/*background-color: white;*/
 	justify-content: center;
 	perspective: 80vw;
 }
@@ -49,7 +48,6 @@
 .minion {
 	width: 14.2%;
 	height: 100%;
-	/*background-color: green;*/
 	position: relative;
 }
 .minion .image {
@@ -64,7 +62,6 @@
 }
 .minion .image.art {
 	background-position: center 5%;
-	background-size: 100%;
 	transform: translateX(-50%);
 	-webkit-clip-path: ellipse(39% 44% at 50% 45%);
 	clip-path: ellipse(39% 44% at 50% 45%);
