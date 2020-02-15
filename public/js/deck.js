@@ -133,6 +133,10 @@ function Minion(prop, board, position) {
 			setTimeout(resolve, 1000);
 		});
 	}
+	this.getPosition = function() {
+		let allMinions = this.parent.querySelectorAll(".minion:not(.before-summon)");
+		return [...allMinions].indexOf(this.ele) - allMinions.length / 2;
+	}
 	this.setAttack = function(attack) {
 		let deltaAttack = attack - this.prop.attack;
 		this.prop.attack = attack;
@@ -141,11 +145,14 @@ function Minion(prop, board, position) {
 			this.animationTimer(this.ele.querySelector(".attack"), "text-splat");
 		}
 	}
-	this.doAttack = function(target) {
+	this.doAttack = function(targetId) {
 		if (this.dead) return;
-		let targetEle = minions[target].ele;
-		let deltaX = targetEle.getBoundingClientRect().x - this.ele.getBoundingClientRect().x;
-		let deltaY = targetEle.getBoundingClientRect().y - this.ele.getBoundingClientRect().y;
+		let target = minions[targetId];
+		let deltaX = (target.getPosition() - this.getPosition()) * 100;
+		let deltaY = this.belongsTo === 0 ? 100 : -100;
+		//let targetEle = target.ele;
+		//let deltaX = targetEle.getBoundingClientRect().x - this.ele.getBoundingClientRect().x;
+		//let deltaY = targetEle.getBoundingClientRect().y - this.ele.getBoundingClientRect().y;
 		//deltaX > 0 ? deltaX -= this.ele.offsetWidth / 3 : deltaX += this.ele.offsetWidth / 3;
 		//deltaY > 0 ? deltaY -= this.ele.offsetHeight / 3 : deltaY += this.ele.offsetHeight / 3;
 		this.parent.style.cssText = "z-index: 100;";
@@ -159,10 +166,10 @@ function Minion(prop, board, position) {
 					transform: translate3d(0, 0, 2vw);
 				}
 				60% {
-					transform: translate3d(${deltaX}px, ${deltaY}px, 0);
+					transform: translate3d(${deltaX}%, ${deltaY}%, 0);
 				}
 				61% {
-					transform: translate3d(${deltaX}px, ${deltaY}px, 0) rotateX(-30deg);
+					transform: translate3d(${deltaX}%, ${deltaY}%, 0) rotateX(-30deg);
 				}
 				80% {
 					transform: translate3d(0, 0, 0) rotateX(-30deg);
