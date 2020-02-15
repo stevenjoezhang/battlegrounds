@@ -1,6 +1,7 @@
 import random
 import database
 import itertools
+import copy
 ch_list=("Beast","Murloc","Mech","Demon","All")
 special_list=("Dire Wolf Alpha","Murloc Warleader","Phalanx Commander","Siegebreaker","Mal'Ganis","Old Murk-Eye",\
               "Zapp Slywick","Foe Reaper 4000","Cave Hydra","Ironhide Direhorn","The Boogeymonster",\
@@ -13,7 +14,7 @@ special_list=("Dire Wolf Alpha","Murloc Warleader","Phalanx Commander","Siegebre
 ##"Ironhide Direhorn" no summon
 
 class minion:
-    def __init__(self,na="",at=0,he=0,ch="",t=False,sh=False,p=False,w=1,d=0,m=0,dea=False,g=False,spe="",ra=""):
+    def __init__(self,na="",at=0,he=0,ch="",t=False,sh=False,p=False,w=1,d=0,m=0,dea=False,g=False,spe="",ra="",tie=0):
         self.name= na
         self.attack = at
         self.health= he
@@ -31,6 +32,7 @@ class minion:
         self.deathrattle=ra
         self.rattle=False
         self.source="origin"
+        self.tier=tie
         self.id = next(self.id_iter)
 
     id_iter = itertools.count()
@@ -173,6 +175,14 @@ class minion:
         return self.health+self.buff[1]-self.damage
     def get_calculated_attack(self):
         return self.attack + self.buff[0]
+
+    def set_tier(self, tie):
+        if tie>0 and tie<7:
+            self.tier = tie
+        else:
+            print ("error:wrong tier set")
+    def get_tier(self):
+        return self.tier
 
     def __str__(self):
         return "name "+self.name+" attack "+str(self.attack)+"+"+str(self.buff[0])+" health "+str(self.health)+"+"+str(self.buff[1])+" damage "+str(self.damage)+" shield "+str(self.shield)+" "+self.special
@@ -605,7 +615,7 @@ def duplicate(lst):
 
 def set_minion(temp,attack_state,golden):#从database的dictionary形式变成minion类
     num=2 if golden else 1
-    a=minion(na=temp["name"],at=temp["atk"]*num,he=temp["health"]*num,ch=temp["tribe"],t=temp["taunt"],sh=temp["divineShield"],p=temp["poisonous"],w=2 if temp["windfury"] else 1,g=golden)
+    a=minion(na=temp["name"],at=temp["atk"]*num,he=temp["health"]*num,ch=temp["tribe"],t=temp["taunt"],sh=temp["divineShield"],p=temp["poisonous"],w=2 if temp["windfury"] else 1,g=golden,tie=temp["tier"])
     if temp["name"] in special_list:
         a.set_special(temp["name"])
     if attack_state==1:
@@ -798,6 +808,14 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
             summon(name, dead.get_move(), pos, lst1, "deathrattle", False)
             pos += len(lst1) - temp
             i += 1
+    elif name=="Gentle Megasaur":#亡语植物
+        times = 2
+        i = 0
+        while i < times and alive_num(lst1) < 7:
+            temp = len(lst1)
+            summon("Plant", dead.get_move(), pos, lst1, "deathrattle", False)
+            pos += len(lst1) - temp
+            i += 1
     else:
         pass
 def alive_num(lst):
@@ -864,6 +882,20 @@ class battlefeild:
         self.result=""
         self.mech_up=[]
         self.mech_down=[]
+
+    def calc_tier(self):
+        if self.result=="up win":
+            num=0
+            for i in self.up:
+                num+=i.get_tier()
+            return num
+        elif self.result=="down win":
+            num = 0
+            for i in self.down:
+                num += i.get_tier()
+            return num
+        else:
+            return 0
 
     def dump(self):
         self.log += self.__str__() + "\n";
@@ -1333,6 +1365,53 @@ class battlefeild:
         str1+="now:"+str(self.now)
         return str1
 
+    def quick_add_up(self,name,attack=0,health=0,taunt=False,shield=False,poison=False,wind=1,golden=False,deathrattle="",times=0):
+        dic = database.get_minions_by_name(name)
+        if dic:
+            temp=dic[0]
+            num=2 if golden else 1
+            a = minion(na=name, at=max(temp["atk"]*num ,attack) , he=max(temp["health"] * num,health), ch=temp["tribe"],\
+                       t=temp["taunt"] if temp["taunt"] else taunt, sh=temp["divineShield"] if temp["divineShield"] else shield,\
+                       p=temp["poisonous"] if temp["poisonous"] else poison,g=golden, tie=temp["tier"])
+            if name in special_list:
+                a.set_special(name)
+            if name=="Zapp Slywick" and golden:
+                a.set_wind(4)
+            else:
+                a.set_wind(2 if temp["windfury"] else wind)
+            if temp["deathrattle"]:
+                a.set_deathrattle((temp["name"]))
+            if deathrattle:
+                for i in range(times):
+                    a.set_deathrattle(deathrattle)
+            if len(self.up)<7:
+                self.up.insert(len(self.up),a)
+
+    def quick_add_down(self, name, attack=0, health=0, taunt=False, shield=False, poison=False, wind=1,
+                     golden=False, deathrattle="", times=0):
+        dic = database.get_minions_by_name(name)
+        if dic:
+            temp = dic[0]
+            num = 2 if golden else 1
+            a = minion(na=name, at=max(temp["atk"] * num, attack), he=max(temp["health"] * num, health),
+                       ch=temp["tribe"], \
+                       t=temp["taunt"] if temp["taunt"] else taunt,
+                       sh=temp["divineShield"] if temp["divineShield"] else shield, \
+                       p=temp["poisonous"] if temp["poisonous"] else poison, g=golden, tie=temp["tier"])
+            if name in special_list:
+                a.set_special(name)
+            if name == "Zapp Slywick" and golden:
+                a.set_wind(4)
+            else:
+                a.set_wind(2 if temp["windfury"] else wind)
+            if temp["deathrattle"]:
+                a.set_deathrattle((temp["name"]))
+            if deathrattle:
+                for i in range(times):
+                    a.set_deathrattle(deathrattle)
+            if len(self.down)<7:
+                self.down.insert(len(self.down),a)
+
 def battle(field):
     field.battle_begin()
     field.dump()
@@ -1353,21 +1432,62 @@ def battle(field):
        # print ("a")
        # print (field,"c\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
-    #print (field.log)
-'''
-a=minion("Cave Hydra", 6, 18, ch="Beast", g=True,spe="Cave Hydra")
-b =minion("Cobalt Guardian", 6, 3,ch="Mech", spe="Cobalt Guardian")
-c =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
-d =minion("Security Rover", 2, 6,ch="Mech",t=True, spe="Security Rover")
-e =minion("Security Rover", 2, 6,ch="Mech", spe="Security Rover")
-f=minion("Khadgar", 2, 2,g=True, spe="Khadgar")
+    print (field.log)
+
+def simulate(field1,time):
+    i=0
+    up,down,tie=0,0,0
+    up1,down1=0,0
+    while i<time:
+        field=copy.deepcopy(field1)
+        field.battle_begin()
+        field.check_state()
+        while not field.get_result():
+            field.minion_battle()
+            field.renew_buff()
+            field.do_deathrattle()
+            field.remove_death()
+            field.detect_death()
+            field.renew_buff()
+            field.renew_attack()
+        if field.get_result()=="up win":
+            up+=1
+            up1+=field.calc_tier()
+        elif field.get_result()=="down win":
+            down+=1
+            down1+=field.calc_tier()
+        elif field.get_result()=="a tie":
+            tie+=1
+        else:
+            print ("error: no result")
+        i+=1
+    print ("test time: ",time)
+    print ("up win: ",up," average damage: ",up1/up if up!=0 else 0)
+    print ("down win: ",down," average damage: ",down1/down if down!=0 else 0)
+    print ("a tie: ",tie)
+
+
+#'''
 ba = battlefeild()
-ba.add_minion(a, "up", 0)
-ba.add_minion(b, "down", 0)
-ba.add_minion(d, "down", 1)
-ba.add_minion(c, "down", 2)
-#ba.add_minion(e, "down", 3)
-ba.add_minion(f,"down",4)
-battle(ba)
+ba.quick_add_up("Kaboom Bot",15, 4,golden=True)
+ba.quick_add_up("Cobalt Guardian", 25, 10,shield=True,deathrattle="Replicating Menace",times=1)
+ba.quick_add_up("Security Rover", 7, 10,shield=True,taunt=True)
+ba.quick_add_up("Shielded Minibot", 9, 2)
+ba.quick_add_up("Screwjank Clunker", 3, 5)
+ba.quick_add_up("Metaltooth Leaper", 13, 6)
+ba.quick_add_up("Baron Rivendare")
+ba.quick_add_down("Cobalt Guardian", 8, 3,shield=True)
+ba.quick_add_down("Harvest Golem", 6, 6,golden=True)
+ba.quick_add_down("Mechano-Egg")
+ba.quick_add_down("Shielded Minibot", 4, 2)
+ba.quick_add_down("Annoy-o-Tron",golden=True)
+ba.quick_add_down("Bolvar, Fireblood")
+ba.quick_add_down("Junkbot")
+print (ba)
+import time
+start_time = time.time()
+simulate(ba,1000)
+end_time = time.time()
+print (end_time-start_time)
 #'''
 

@@ -24,10 +24,6 @@ async function fetchDB(file) {
 	console.log(data);
 	return data;
 }
-function randId(db) {
-	let target = db[Math.floor(Math.random() * db.length)];
-	return target.goldenId || target.id;
-}
 async function initBoard() {
 	window.database = await fetchDB("/data.json");
 	window.battle = await fetchDB("/battle.json");
@@ -150,11 +146,6 @@ function Minion(prop, board, position) {
 		let target = minions[targetId];
 		let deltaX = (target.getPosition() - this.getPosition()) * 100;
 		let deltaY = this.belongsTo === 0 ? 100 : -100;
-		//let targetEle = target.ele;
-		//let deltaX = targetEle.getBoundingClientRect().x - this.ele.getBoundingClientRect().x;
-		//let deltaY = targetEle.getBoundingClientRect().y - this.ele.getBoundingClientRect().y;
-		//deltaX > 0 ? deltaX -= this.ele.offsetWidth / 3 : deltaX += this.ele.offsetWidth / 3;
-		//deltaY > 0 ? deltaY -= this.ele.offsetHeight / 3 : deltaY += this.ele.offsetHeight / 3;
 		this.parent.style.cssText = "z-index: 100;";
 		document.querySelectorAll(".minions")[1 - this.belongsTo].style.cssText = "z-index: 0;";
 		let rid = makeid(8);
