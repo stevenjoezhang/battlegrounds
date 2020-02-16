@@ -75,9 +75,9 @@ function Minion(prop, board, position) {
 	this.animationTimer = function(target, className) {
 		return new Promise(resolve => {
 			target.classList.add(className);
-			let listener = target.addEventListener("animationend", () => {
+			target.addEventListener("animationend", () => {
 				target.classList.remove(className);
-				target.removeEventListener("animationend", listener);
+				target.removeEventListener("animationend", arguments.callee);
 				resolve();
 			});
 		});

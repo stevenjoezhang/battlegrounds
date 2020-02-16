@@ -191,11 +191,16 @@
 }
 @keyframes summon {
 	0% {
-		transform: rotateY(90deg);
+		visibility: hidden;
 		max-width: 0;
 	}
-	100% {
+	50% {
+		visibility: hidden;
+		transform: rotateY(90deg);
 		max-width: 15vw;
+	}
+	100% {
+		visibility: visible;
 	}
 }
 .section-decklist.shake-down {
