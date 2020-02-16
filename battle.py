@@ -456,7 +456,7 @@ def single_minion_battle(m,m_lst):
             len1=len(m_lst)
             if not Flag1:
                 after_injury(m_lst,aim)
-            if not Flag2 :#招完之后还没满，attack无dead
+            if not Flag2:#招完之后还没满，attack无dead
                 after_injury(m_lst, aim+1+len(m_lst)-len1)
         elif aim == minionlist - 1:
             Flag1 = m_lst[aim-1].get_shield()
@@ -484,9 +484,9 @@ def single_minion_battle(m,m_lst):
             len1 = len(m_lst)
             if not Flag1:
                 after_injury(m_lst, aim - 1)
-            if (not Flag2) :  # 招完之后还没满，attack无dead
+            if (not Flag2):  # 招完之后还没满，attack无dead
                 after_injury(m_lst, aim + len(m_lst)-len1)
-            if (not Flag3) :  # 招完之后还没满，attack无dead
+            if (not Flag3):  # 招完之后还没满，attack无dead
                 after_injury(m_lst, aim + 1+len(m_lst)-len1)
         m.set_move(2)
     elif m.get_special() == "The Boogeymonster":
@@ -499,7 +499,7 @@ def single_minion_battle(m,m_lst):
             lose_shield(m_lst,1)
         else:
             after_injury(m_lst,aim)
-        if m_lst[aim].get_damage() >= (m_lst[aim].get_health() + m_lst[aim].get_buff_health()) and m.get_damage() < (m.get_health() + m.get_buff_health()):
+        if m_lst[aim].get_damage() >= (m_lst[aim].get_health() + m_lst[aim].get_buff_health()) and m.get_damage() < (m.get_health() + m.get_buff_health()) and (not m.get_death()):
             if m.get_golden():
                 m.set_health(4)
                 m.set_attack(4)
@@ -526,7 +526,7 @@ def single_minion_battle(m,m_lst):
         usual_minion_battle(m,m_lst[aim])
         if flag:
             lose_shield(m_lst,1)
-        else:
+        elif len(m_lst)<7:
             after_injury(m_lst, aim)
     return [Flag,be_attack]
 
@@ -839,10 +839,9 @@ def summon(name,attack_state,pos,lst,source,gold):#记得马上renew_buff
         if dic:
             minion1=set_minion(dic[0],attack_state,gold)
             minion1.set_source(source)
-            charater=minion1.get_character()
             summon_buff(minion1,lst)
             lst.insert(pos,minion1.copy())
-            after_summon(lst,charater)
+            after_summon(lst,pos)
             copies=minion1.copy()
             summon_buff(copies,lst)
             times=duplicate(lst)
@@ -850,20 +849,21 @@ def summon(name,attack_state,pos,lst,source,gold):#记得马上renew_buff
             while (n<times and alive_num(lst)<7):
                 n+=1
                 lst.insert(pos+n,copies.copy())
-                after_summon(lst, charater)
+                after_summon(lst, pos+n)
 
-def after_summon(lst,ch):
+def after_summon(lst,pos):
+    ch=lst[pos].get_character()
     if ch=="Mech":
-        for i in lst:
-            if i.get_special()=="Cobalt Guardian":
-                i.set_shield(True)
+        for i in range(len(lst)):
+            if lst[i].get_special()=="Cobalt Guardian" and i!=pos:
+                lst[i].set_shield(True)
     elif ch=="Murloc":
-        for i in lst:
-            if i.get_special() == "Murloc Tidecaller":
-                if i.get_golden():
-                    i.set_attack(2)
+        for i in range(len(lst)):
+            if lst[i].get_special() == "Murloc Tidecaller" and i!=pos:
+                if lst[i].get_golden():
+                    lst[i].set_attack(2)
                 else:
-                    i.set_attack(1)
+                    lst[i].set_attack(1)
 
 
 class battlefeild:
@@ -1046,9 +1046,9 @@ class battlefeild:
                     self.set_attack_time()
                     self.add_already_attack()
                     self.attack_flag=True
-                    if temp[0]:
+                    if temp[0] and len(self.up)<7:
                         summon("Ironhide Runt", 0, pos + 1, self.up, "overkill", self.up[pos].get_golden())
-                    if damage2-damage1>0:
+                    if damage2-damage1>0 and len(self.up)<7:
                         after_injury(self.up,pos)
                     self.detect_death()
                     after_attack(self.up)
@@ -1068,9 +1068,9 @@ class battlefeild:
                     self.set_attack_time()
                     self.add_already_attack()
                     self.attack_flag = True
-                    if temp[0]:
+                    if temp[0] and len(self.down)<7:
                         summon("Ironhide Runt", 0, pos + 1, self.down, "overkill", self.down[pos].get_golden())
-                    if damage2-damage1>0:
+                    if damage2-damage1>0 and len(self.down)<7:
                         after_injury(self.down,pos)
                     self.detect_death()
                     after_attack(self.down)
@@ -1172,18 +1172,18 @@ class battlefeild:
     def detect_death(self):
         Flag=True
         for i in self.up:
-            if i.get_damage()>= (i.get_health()+i.get_buff_health()):
+            if i.get_damage()>= (i.get_health()+i.get_buff_health()) or i.get_death():
                 i.set_death(True)
-                self.set_dead_minion(True)
                 Flag=False
 
         for j in self.down:
-            if j.get_damage()>= (j.get_health()+j.get_buff_health()):
+            if j.get_damage()>= (j.get_health()+j.get_buff_health()) or j.get_death():
                 j.set_death(True)
-                self.set_dead_minion(True)
                 Flag=False
         if Flag:
             self.set_dead_minion(False)
+        else:
+            self.set_dead_minion(True)
 
     def remove_death(self):
         self.up=list(filter(lambda x: not x.get_rattle(), self.up))

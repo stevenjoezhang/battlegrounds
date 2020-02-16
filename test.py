@@ -383,3 +383,20 @@ def test18():
     ba.quick_add_down("Cobalt Guardian",32,12,True,True,golden=True,deathrattle="Replicating Menace")
     ba.quick_add_down("Kangor's Apprentice")
     return ba
+def test19():
+    ba = battlefeild()
+    ba.quick_add_up("Kaboom Bot", 12, 14, True, True, golden=True)
+    ba.quick_add_up('Goldrinn, the Great Wolf', 10, 10, taunt=True)
+    ba.quick_add_up('Goldrinn, the Great Wolf', 10, 10, taunt=True)
+    ba.quick_add_up("Cave Hydra")
+    ba.quick_add_up("Ghastcoiler")
+    ba.quick_add_up("Ghastcoiler")
+    ba.quick_add_up("Baron Rivendare")
+    ba.quick_add_down('Goldrinn, the Great Wolf', 5, 5, taunt=True)
+    ba.quick_add_down("Cave Hydra", 5, 4)
+    ba.quick_add_down("Cave Hydra", 5, 4)
+    ba.quick_add_down("Ironhide Direhorn", 17, golden=True)
+    ba.quick_add_down("Ironhide Direhorn")
+    ba.quick_add_down("Ghastcoiler", 10)
+    ba.quick_add_down("Baron Rivendare", 2, 8)
+    return ba
