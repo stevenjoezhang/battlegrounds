@@ -177,7 +177,7 @@ function Minion(prop, board, position) {
 		this.animationTimer(this.ele, `attacking-${rid}`);
 		return new Promise(resolve => {
 			setTimeout(() => {
-				this.animationTimer(document.querySelector(".section-decklist"), this.belongsTo === 0 ? "shake-down" : "shake-up");
+				if (this.prop.attack >= 8) this.animationTimer(document.querySelector(".section-decklist"), this.belongsTo === 0 ? "shake-down" : "shake-up");
 				resolve();
 			}, 500);
 		});
@@ -198,7 +198,7 @@ function Minion(prop, board, position) {
 			var animEle = this.createOverlayAnim("deathrattle-die");
 			document.body.appendChild(animEle);
 			setTimeout(() => {
-				//document.body.removeChild(animEle);
+				document.body.removeChild(animEle);
 			}, 4000);
 		}
 		this.ele.classList.add("dying");

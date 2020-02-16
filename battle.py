@@ -1095,7 +1095,7 @@ class battlefeild:
                     self.down[i].set_rattle(True)
                     dead_down.append(i)
                     if self.down[i].get_character() == "Mech" and len(self.mech_down) < 2:
-                        self.mech_down.append([self.down[i].get_name(),self.up[i].get_golden()])
+                        self.mech_down.append([self.down[i].get_name(),self.down[i].get_golden()])
             if self.begin:
                 times = deathrattle_time(self.up)
                 for i in dead_up:
