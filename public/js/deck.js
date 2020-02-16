@@ -198,7 +198,7 @@ function Minion(prop, board, position) {
 			var animEle = this.createOverlayAnim("deathrattle-die");
 			document.body.appendChild(animEle);
 			setTimeout(() => {
-				document.body.removeChild(animEle);
+				//document.body.removeChild(animEle);
 			}, 4000);
 		}
 		this.ele.classList.add("dying");

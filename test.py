@@ -287,7 +287,7 @@ def test13():#检测卡德加，野兽，小妈/熊妈
     ba.add_minion(d, "down", 2)
     ba.add_minion(e, "down", 3)
     return ba
-def test14():
+def test14():#真实的一局
     a = minion("Kaboom Bot", 15, 4, ch="Mech", g=True,ra="Kaboom Bot")
     b =minion("Cobalt Guardian", 25, 10, ch="Mech", sh=True,spe="Cobalt Guardian",ra="Replicating Menace")
     c = minion("Security Rover", 7, 10, ch="Mech",sh=True,t=True, spe="Security Rover")
@@ -332,4 +332,54 @@ def test15():#检测超杀，熊妈，卡德加
     ba.add_minion(d, "down", 0)
     ba.add_minion(e, "down", 1)
     ba.add_minion(f, "down", 2)
+    return ba
+def test16():
+    ba=battlefeild()
+    ba.quick_add_up("Goldrinn, the Great Wolf",7)
+    ba.quick_add_up("Spawn of N'Zoth")
+    ba.quick_add_up("Infested Wolf",6)
+    ba.quick_add_up("Rat Pack")
+    ba.quick_add_up("Rat Pack")
+    ba.quick_add_up("Scavenging Hyena",10,golden=True)
+    ba.quick_add_up("Pack Leader")
+    ba.quick_add_down('Annoy-o-Tron',9)
+    ba.quick_add_down("Micro Machine",30,7,golden=True)
+    ba.quick_add_down("Siegebreaker",9,10)
+    ba.quick_add_down("Lightfang Enforcer")
+    ba.quick_add_down("Shielded Minibot",15,4,deathrattle="Replicating Menace")
+    ba.quick_add_down("Festeroot Hulk",golden=True)
+    ba.quick_add_down("Junkbot")
+    return ba
+def test17():
+    ba=battlefeild()
+    ba.quick_add_up("Floating Watcher",76,76,golden=True)
+    ba.quick_add_up("Selfless Hero",7,5,golden=True)
+    ba.quick_add_up("Wrath Weaver",59,59,golden=True,taunt=True)
+    ba.quick_add_up("Selfless Hero", 24, 22, golden=True,taunt=True)
+    ba.quick_add_up("Wrath Weaver",22,22)
+    ba.quick_add_up("Ghastcoiler")
+    ba.quick_add_up("Baron Rivendare",7,13)
+    ba.quick_add_down('Goldrinn, the Great Wolf',16,10,taunt=True)
+    ba.quick_add_down("Cave Hydra",12,8)
+    ba.quick_add_down("Cave Hydra",12,8)
+    ba.quick_add_down("Ironhide Direhorn",17,11)
+    ba.quick_add_down("Rat Pack",19,7,golden=True)
+    ba.quick_add_down("Mama Bear",10)
+    ba.quick_add_down("Baron Rivendare")
+    return ba
+def test18():
+    ba=battlefeild()
+    ba.quick_add_up('Goldrinn, the Great Wolf',6,6,taunt=True)
+    ba.quick_add_up("Cave Hydra",6,8)
+    ba.quick_add_up("Ironhide Direhorn",22,22,golden=True)
+    ba.quick_add_up("Sated Threshadon")
+    ba.quick_add_up("Maexxna",6,12)
+    ba.quick_add_up("Ghastcoiler")
+    ba.quick_add_up("Baron Rivendare")
+    ba.quick_add_down('Foe Reaper 4000',14,)
+    ba.quick_add_down("Kaboom Bot",20,14,True,True,golden=True,deathrattle="Replicating Menace")
+    ba.quick_add_down("Security Rover",19,17,True,True)
+    ba.quick_add_down("Mechano-Egg",12,16,True,True,golden=True)
+    ba.quick_add_down("Cobalt Guardian",32,12,True,True,golden=True,deathrattle="Replicating Menace")
+    ba.quick_add_down("Kangor's Apprentice")
     return ba

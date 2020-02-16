@@ -1089,13 +1089,13 @@ class battlefeild:
                     self.up[i].set_rattle(True)
                     dead_up.append(i)
                     if self.up[i].get_character() == "Mech" and len(self.mech_up) < 2:
-                        self.mech_up.append(self.up[i].get_name())
+                        self.mech_up.append([self.up[i].get_name(),self.up[i].get_golden()])
             for i in range(len(self.down)):
                 if self.down[i].get_death():
                     self.down[i].set_rattle(True)
                     dead_down.append(i)
                     if self.down[i].get_character() == "Mech" and len(self.mech_down) < 2:
-                        self.mech_down.append(self.down[i].get_name())
+                        self.mech_down.append([self.down[i].get_name(),self.up[i].get_golden()])
             if self.begin:
                 times = deathrattle_time(self.up)
                 for i in dead_up:
@@ -1106,7 +1106,7 @@ class battlefeild:
                                 if j == "Kangor's Apprentice" and alive_num(self.up)<7:
                                     for l in self.mech_up:
                                         temp = len(self.up)
-                                        summon(l,self.up[i+pos_up].get_move(),i+pos_up+1,self.up,"deathrattle",self.up[i+pos_up].get_golden())
+                                        summon(l[0],self.up[i+pos_up].get_move(),i+pos_up+1,self.up,"deathrattle",l[1])
                                         pos_up += len(self.up) - temp
                                 else:
                                     temp=len(self.up)
@@ -1123,7 +1123,7 @@ class battlefeild:
                                 if j == "Kangor's Apprentice" and alive_num(self.down)<7:
                                     for l in self.mech_down:
                                         temp = len(self.down)
-                                        summon(l,self.down[i+pos_down].get_move(),i+pos_down+1,self.down,"deathrattle",self.down[i+pos_down].get_golden())
+                                        summon(l[0],self.down[i+pos_down].get_move(),i+pos_down+1,self.down,"deathrattle",l[1])
                                         pos_down += len(self.down) - temp
                                 else:
                                     temp = len(self.down)
@@ -1141,8 +1141,8 @@ class battlefeild:
                                 if j == "Kangor's Apprentice" and alive_num(self.down) < 7:
                                     for l in self.mech_down:
                                         temp = len(self.down)
-                                        summon(l, self.down[i + pos_down].get_move(), i + pos_down+1, self.down,
-                                               "deathrattle", self.down[i + pos_down].get_golden())
+                                        summon(l[0], self.down[i + pos_down].get_move(), i + pos_down+1, self.down,
+                                               "deathrattle", l[1])
                                         pos_down += len(self.down) - temp
                                 else:
                                     temp = len(self.down)
@@ -1159,8 +1159,8 @@ class battlefeild:
                                 if j == "Kangor's Apprentice" and alive_num(self.up) < 7:
                                     for l in self.mech_up:
                                         temp = len(self.up)
-                                        summon(l, self.up[i + pos_up].get_move(), i + pos_up+1, self.up, "deathrattle",
-                                               self.up[i + pos_up].get_golden())
+                                        summon(l[0], self.up[i + pos_up].get_move(), i + pos_up+1, self.up, "deathrattle",
+                                               l[1])
                                         pos_up += len(self.up) - temp
                                 else:
                                     temp = len(self.up)
@@ -1365,7 +1365,7 @@ class battlefeild:
         str1+="now:"+str(self.now)
         return str1
 
-    def quick_add_up(self,name,attack=0,health=0,taunt=False,shield=False,poison=False,wind=1,golden=False,deathrattle="",times=0):
+    def quick_add_up(self,name,attack=0,health=0,taunt=False,shield=False,poison=False,wind=1,golden=False,deathrattle="",times=1):
         dic = database.get_minions_by_name(name)
         if dic:
             temp=dic[0]
@@ -1388,7 +1388,7 @@ class battlefeild:
                 self.up.insert(len(self.up),a)
 
     def quick_add_down(self, name, attack=0, health=0, taunt=False, shield=False, poison=False, wind=1,
-                     golden=False, deathrattle="", times=0):
+                     golden=False, deathrattle="", times=1):
         dic = database.get_minions_by_name(name)
         if dic:
             temp = dic[0]
@@ -1432,7 +1432,7 @@ def battle(field):
        # print ("a")
        # print (field,"c\n")
         #print (field.get_already_attack()," ",field.get_attack_time())
-    print (field.log)
+   # print (field.log)
 
 def simulate(field1,time):
     i=0
@@ -1467,20 +1467,20 @@ def simulate(field1,time):
     print ("a tie: ",tie)
 
 
-#'''
+'''
 ba = battlefeild()
-ba.quick_add_up("Kaboom Bot",15, 4,golden=True)
+ba.quick_add_up("Kaboom Bot",15, golden=True)
 ba.quick_add_up("Cobalt Guardian", 25, 10,shield=True,deathrattle="Replicating Menace",times=1)
 ba.quick_add_up("Security Rover", 7, 10,shield=True,taunt=True)
-ba.quick_add_up("Shielded Minibot", 9, 2)
-ba.quick_add_up("Screwjank Clunker", 3, 5)
-ba.quick_add_up("Metaltooth Leaper", 13, 6)
+ba.quick_add_up("Shielded Minibot", 9)
+ba.quick_add_up("Screwjank Clunker", 3)
+ba.quick_add_up("Metaltooth Leaper", 13,golden=True)
 ba.quick_add_up("Baron Rivendare")
-ba.quick_add_down("Cobalt Guardian", 8, 3,shield=True)
-ba.quick_add_down("Harvest Golem", 6, 6,golden=True)
+ba.quick_add_down("Cobalt Guardian", 8, shield=True)
+ba.quick_add_down("Harvest Golem", 6, golden=True)
 ba.quick_add_down("Mechano-Egg")
-ba.quick_add_down("Shielded Minibot", 4, 2)
-ba.quick_add_down("Annoy-o-Tron",golden=True)
+ba.quick_add_down("Shielded Minibot", 4)
+ba.quick_add_down("Screwjank Clunker")
 ba.quick_add_down("Bolvar, Fireblood")
 ba.quick_add_down("Junkbot")
 print (ba)
