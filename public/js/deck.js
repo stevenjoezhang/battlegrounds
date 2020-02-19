@@ -94,7 +94,7 @@ function Minion(prop, board, position) {
 		if (this.prop.golden) this.ele.classList.add("golden");
 		if (this.data.divineShield) this.ele.classList.add("shield");
 		if (this.data.cleave) this.ele.classList.add("trigger");
-		["legendary", "taunt", "poisonous", "windfury", "deathrattle", "shield"].forEach(item => {
+		["legendary", "taunt", "poisonous", "windfury", "deathrattle", "shield", "reborn"].forEach(item => {
 			if (this.data[item] || this.prop[item]) this.ele.classList.add(item);
 		});
 	}
@@ -222,18 +222,16 @@ function Minion(prop, board, position) {
 		let queue = {
 			health: [],
 			die: [],
-			summon: {
-				before: [],
-				after: []
-			}
+			summon: [[], [], []]
 		};
 		["up", "down"].forEach(board => {
 			result[board].forEach((target, position) => {
 				let minion = minions[target.id];
 				if (!minion) {
 					minion = minions[target.id] = new Minion(target, board, position);
-					if (["damage", "overkill"].includes(minion.prop.source)) queue.summon.before.push(() => minion.summon());
-					else queue.summon.after.push(() => minion.summon());
+					if (["damage", "overkill"].includes(minion.prop.source)) queue.summon[0].push(() => minion.summon());
+					else if (minion.prop.source === "reborn") queue.summon[2].push(() => minion.summon());
+					else queue.summon[1].push(() => minion.summon());
 					return;
 				}
 				queue.health.push(() => minion.setShield(target.shield));
@@ -245,8 +243,9 @@ function Minion(prop, board, position) {
 		if (attacking.length === 2) await minions[attacking[0]].doAttack(attacking[1]);
 		await Promise.all(queue.die.map(ele => ele()));
 		await Promise.all(queue.health.map(ele => ele()));
-		await Promise.all(queue.summon.before.map(ele => ele()));
-		await Promise.all(queue.summon.after.map(ele => ele()));
+		for (let i = 0; i < 3; i++) {
+			await Promise.all(queue.summon[i].map(ele => ele()));
+		}
 		if (typeof battle[3] === "number") {
 			await new Promise(resolve => {
 				setTimeout(resolve, battle[3]);

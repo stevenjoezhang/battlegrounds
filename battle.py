@@ -166,7 +166,7 @@ class minion:
         return self.special
 
     def set_source(self,so):
-        if so in ["origin","overkill","damage","deathrattle"]:
+        if so in ["origin","overkill","damage","deathrattle","reborn"]:
             self.source=so
         else:
             print ("error: wrong source set")
@@ -947,7 +947,7 @@ def preset_reborn(pos,lst):#先把位置占着
     dic=database.get_minions_by_name(lst[pos].get_name())
     if dic:
         minion1=set_minion(dic[0],lst[pos].get_move(),lst[pos].get_golden())
-        minion1.set_source("deathrattle")
+        minion1.set_source("reborn")
         minion1.set_damage(minion1.get_health() - 1 if minion1.get_health() > 1 else 0)
         minion1.set_reborn(2)
         minion1.set_death(True)
@@ -1043,7 +1043,8 @@ class battlefeild:
                     "golden": minion.get_golden(),
                     "death": minion.get_rattle(),
                     "name": minion.get_name(),
-                    "source": minion.get_source()
+                    "source": minion.get_source(),
+                    "reborn": minion.get_reborn()
                 })
         self.history.append(current)
     def set_log(self,lo):
