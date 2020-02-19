@@ -735,7 +735,6 @@ def select_undead(lst):
         return -1
 
 def single_deathrattle(name,dead,lst1,lst2,pos):
-    print (name,dead.get_name())
     if name == "Kaboom Bot":
         times=2 if dead.get_golden() else 1
         for j in range(times):
@@ -813,7 +812,17 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
     elif name == "Imprisoner":
         summon("Imp", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
     elif  name == "The Beast":
-        summon("Finkle Einhorn",0, len(lst2), lst2, "deathrattle", False)
+        if alive_num(lst2) < 7:
+            dic = database.get_minions_by_name("Finkle Einhorn")
+            times = duplicate(lst1)
+            minion1 = set_minion(dic[0],0,False)
+            minion1.set_source("deathrattle")
+            lst2.insert(len(lst2), minion1.copy())
+            copies = minion1.copy()
+            n = 0
+            while (n < times and alive_num(lst2) < 7):
+                n += 1
+                lst2.insert(len(lst2), copies.copy())
     elif name == "Infested Wolf":
         temp = len(lst1)
         summon("Spider", dead.get_move(), pos, lst1, "deathrattle", dead.get_golden())
@@ -1558,6 +1567,12 @@ class battlefeild:
             str1+=str(i)+"\n"
         str1+="now:"+str(self.now)
         return str1
+
+
+    def reverse(self):
+        temp=self.up
+        self.up=self.down
+        self.down=temp
 
     def quick_add_up(self,name,attack=0,health=0,taunt=False,shield=False,poison=False,wind=1,golden=False,deathrattle="",times=1):
         dic = database.get_minions_by_name(name)
