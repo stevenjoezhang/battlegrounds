@@ -57,6 +57,7 @@ function Minion(prop, board, position) {
 			<div class="image border"></div>
 			<div class="image taunt"></div>
 			<div class="image legendary"></div>
+			<div class="image reborn"></div>
 			<div class="image deathrattle"></div>
 			<div class="image trigger"></div>
 			<div class="image poisonous"></div>

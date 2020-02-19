@@ -103,6 +103,9 @@
 	animation: lose-shield 1s forwards;
 	animation-delay: .5s;
 }
+.minion.reborn .reborn {
+	background-image: url(/img/reborn.png);
+}
 .image.blood-splat {
 	transform: translateX(-50%) scale(1);
 	background-image: url(/img/blood-splat.png);
