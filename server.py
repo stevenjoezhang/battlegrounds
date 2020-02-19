@@ -9,7 +9,7 @@ from battle import minion, battlefeild, battle
 import test
 
 def run(queue):
-    ba=test.test18()
+    ba=test.test19()
     battle(ba)
     queue.put([ba.history,ba.atkHistory,ba.log])
 

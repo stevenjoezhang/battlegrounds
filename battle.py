@@ -2,6 +2,7 @@ import random
 import database
 import itertools
 import copy
+
 ch_list=("Beast","Murloc","Mech","Demon","All")
 special_list=("Dire Wolf Alpha","Murloc Warleader","Phalanx Commander","Siegebreaker","Mal'Ganis","Old Murk-Eye",\
               "Zapp Slywick","Foe Reaper 4000","Cave Hydra","Ironhide Direhorn","The Boogeymonster",\
@@ -33,6 +34,7 @@ class minion:
         self.rattle=False
         self.source="origin"
         self.tier=tie
+        self.reborn=0
         self.id = next(self.id_iter)
 
     id_iter = itertools.count()
@@ -171,6 +173,14 @@ class minion:
     def get_source(self):
        return self.source
 
+    def set_reborn(self,re):
+        if re in [0, 1,2]:
+            self.reborn = re
+        else:
+            print ("error: wrong reborn set")
+    def get_reborn(self):
+            return self.reborn
+
     def get_calculated_health(self):
         return self.health+self.buff[1]-self.damage
     def get_calculated_attack(self):
@@ -185,7 +195,8 @@ class minion:
         return self.tier
 
     def __str__(self):
-        return "name "+self.name+" attack "+str(self.attack)+"+"+str(self.buff[0])+" health "+str(self.health)+"+"+str(self.buff[1])+" damage "+str(self.damage)+" shield "+str(self.shield)+" "+self.special
+        return "name "+self.name+" attack "+str(self.attack)+"+"+str(self.buff[0])+" health "+str(self.health)+"+"+\
+               str(self.buff[1])+" damage "+str(self.damage)+" shield "+str(self.shield)+" "+self.special
 
     def minion_attack(self,other):
           if self.shield and other.get_calculated_attack()>0:
@@ -199,8 +210,9 @@ class minion:
 
     def copy(self):
         new=minion(self.name,self.attack,self.health,self.character,self.taunt,self.shield,self.poison,self.wind,self.damage,\
-                   self.move,self.death,self.golden,self.special,self.deathrattle)
+                   self.move,self.death,self.golden,self.special,self.deathrattle,self.tier)
         new.set_source(self.source)
+        new.set_reborn(self.reborn)
         return new
 
     def __eq__(self, other):
@@ -208,6 +220,83 @@ class minion:
             return True
         else:
             return False
+
+def single_heropower(name,lst1,lst2):
+    if name=="Murloc King":
+        for i in lst1:
+            i.set_deathrattle("Murloc Scout")
+    elif name=="Nefarious Fire":
+        num=0
+        for i in range(len(lst2)):
+            if lst2[i].get_shield():
+                lst2[i].set_shield(False)
+                num+=1
+            else:
+                lst2[i].set_damage(1)
+                after_injury(lst2, i)
+        lose_shield(lst2, num)
+    elif name=="Fire the Cannons":
+        if len(lst2)==1:
+            if lst2[0].get_shield():
+                lst2[0].set_shield(False)
+                lose_shield(lst2, 1)
+            else:
+                lst2[0].set_damage(4)
+                after_injury(lst2, 0)
+        elif len(lst2)>1:
+            aim_lst=random.sample([i for i in range(len(lst2))], k=2)
+            temp=len(lst2)
+            target=aim_lst[0]
+            if lst2[target].get_shield():
+                lst2[target].set_shield(False)
+                lose_shield(lst2, 1)
+            else:
+                lst2[target].set_damage(4)
+                after_injury(lst2, target)
+            if aim_lst[1]>aim_lst[0]:
+                target=aim_lst[1]+len(lst2)-temp
+            else:
+                target=aim_lst[1]
+            if lst2[target].get_shield():
+                lst2[target].set_shield(False)
+                lose_shield(lst2, 1)
+            else:
+                lst2[target].set_damage(4)
+                after_injury(lst2, target)
+    elif name=="Rage Potion":
+        if lst1:
+            lst1[0].set_attack(20)
+    elif name=="DIE, INSECTS":
+        if len(lst2)==1:
+            if lst2[0].get_shield():
+                lst2[0].set_shield(False)
+                lose_shield(lst2, 1)
+            else:
+                lst2[0].set_damage(8)
+                after_injury(lst2, 0)
+        elif len(lst2)>1:
+            aim_lst=random.sample([i for i in range(len(lst2))], k=2)
+            temp=len(lst2)
+            target=aim_lst[0]
+            if lst2[target].get_shield():
+                lst2[target].set_shield(False)
+                lose_shield(lst2, 1)
+            else:
+                lst2[target].set_damage(8)
+                after_injury(lst2, target)
+            if aim_lst[1]>aim_lst[0]:
+                target=aim_lst[1]+len(lst2)-temp
+            else:
+                target=aim_lst[1]
+            if lst2[target].get_shield():
+                lst2[target].set_shield(False)
+                lose_shield(lst2, 1)
+            else:
+                lst2[target].set_damage(8)
+                after_injury(lst2, target)
+    elif name=="Reborn Rites":
+        if lst1:
+            lst1[-1].set_reborn(1)
 
 def origin_minion_buff(lst):  #所有minion_buff
     minionlist=len(lst)
@@ -582,8 +671,7 @@ def after_injury(lst,pos):
         summon("Guard Bot", lst[pos].get_move(), pos + 1, lst, "damage", lst[pos].get_golden())
     elif lst[pos].get_special()=="Imp Gang Boss":
         summon("Imp", lst[pos].get_move(), pos + 1, lst, "damage", lst[pos].get_golden())
-    else:
-        pass
+
 
 def summon_buff(minion1,lst):
     if minion1.get_character()=="Beast":
@@ -647,6 +735,7 @@ def select_undead(lst):
         return -1
 
 def single_deathrattle(name,dead,lst1,lst2,pos):
+    print (name,dead.get_name())
     if name == "Kaboom Bot":
         times=2 if dead.get_golden() else 1
         for j in range(times):
@@ -816,8 +905,11 @@ def single_deathrattle(name,dead,lst1,lst2,pos):
             summon("Plant", dead.get_move(), pos, lst1, "deathrattle", False)
             pos += len(lst1) - temp
             i += 1
+    elif name=="Murloc Scout":
+        summon(name,dead.get_move(), pos, lst1, "deathrattle", False)
     else:
         pass
+
 def alive_num(lst):
     num=0
     for i in lst:
@@ -837,6 +929,7 @@ def summon(name,attack_state,pos,lst,source,gold):#记得马上renew_buff
     if alive_num(lst)<7:
         dic=database.get_minions_by_name(name)
         if dic:
+            times = duplicate(lst)
             minion1=set_minion(dic[0],attack_state,gold)
             minion1.set_source(source)
             summon_buff(minion1,lst)
@@ -844,12 +937,40 @@ def summon(name,attack_state,pos,lst,source,gold):#记得马上renew_buff
             after_summon(lst,pos)
             copies=minion1.copy()
             summon_buff(copies,lst)
-            times=duplicate(lst)
             n=0
             while (n<times and alive_num(lst)<7):
                 n+=1
                 lst.insert(pos+n,copies.copy())
                 after_summon(lst, pos+n)
+
+def preset_reborn(pos,lst):#先把位置占着
+    dic=database.get_minions_by_name(lst[pos].get_name())
+    if dic:
+        minion1=set_minion(dic[0],lst[pos].get_move(),lst[pos].get_golden())
+        minion1.set_source("deathrattle")
+        minion1.set_damage(minion1.get_health() - 1 if minion1.get_health() > 1 else 0)
+        minion1.set_reborn(2)
+        minion1.set_death(True)
+        i=1
+        while pos+i<len(lst)and lst[pos+i].get_death():
+            i+=1
+        lst.insert(pos+i,minion1.copy())
+        lst[pos].set_reborn(0)
+def single_reborn(pos,lst):
+    minion1=lst.pop(pos)
+    minion1.set_death(False)
+    minion1.set_reborn(0)
+    times = duplicate(lst)
+    summon_buff(minion1, lst)
+    lst.insert(pos, minion1.copy())
+    after_summon(lst, pos)
+    copies = minion1.copy()
+    summon_buff(copies, lst)
+    n = 0
+    while (n < times and alive_num(lst) < 7):
+        n += 1
+        lst.insert(pos + n, copies.copy())
+        after_summon(lst, pos + n)
 
 def after_summon(lst,pos):
     ch=lst[pos].get_character()
@@ -882,6 +1003,11 @@ class battlefeild:
         self.result=""
         self.mech_up=[]
         self.mech_down=[]
+        self.heropower=[]
+        self.secret=[]
+
+    def set_heropower(self,hero1="",hero2=""):
+        self.heropower=[hero1,hero2]
 
     def calc_tier(self):
         if self.result=="up win":
@@ -1026,6 +1152,24 @@ class battlefeild:
                     i.set_attack(-(Murloc_num-1))
                     i.set_buff([Murloc_num-1, 0])
 
+    def do_heropowers(self):
+        side=False
+        if len(self.up)==len(self.down):
+            side=self.now[1]
+        else:
+            side=self.begin
+        if side:
+            if self.heropower[0]:
+                single_heropower(self.heropower[0],self.up,self.down)
+            if self.heropower[1]:
+                single_heropower(self.heropower[1],self.down,self.up)
+        else:
+            if self.heropower[1]:
+                single_heropower(self.heropower[1], self.down, self.up)
+            if self.heropower[0]:
+                single_heropower(self.heropower[0], self.up, self.down)
+        self.detect_death()
+
     def minion_battle(self):
         side = self.now[1]
         pos=self.now[0]
@@ -1054,7 +1198,10 @@ class battlefeild:
                     after_attack(self.up)
                 if pos !=-1:
                     if self.up[pos].get_death():
-                        self.attack_over()
+                        if self.up[pos].get_move():
+                            self.attack_over()
+                        else:
+                            self.set_now(-1,side)
             else:
                 if (not self.dead_minion) and self.down:
                     Flag = self.down[pos].get_shield()
@@ -1076,8 +1223,24 @@ class battlefeild:
                     after_attack(self.down)
                 if pos!=-1:
                     if self.down[pos].get_death():
-                        self.attack_over()
+                        if self.down[pos].get_move():
+                            self.attack_over()
+                        else:
+                            self.set_now(-1, side)
         self.atkHistory.append(attack_state)
+
+    def reborn_preset(self):
+        if not self.attack_flag:
+            i=0
+            while i<len(self.up):
+                if self.up[i].get_death() and self.up[i].get_reborn()==1:
+                    preset_reborn(i,self.up)
+                i+=1
+            i=0
+            while i < len(self.down):
+                if self.down[i].get_death() and self.down[i].get_reborn() == 1:
+                    preset_reborn(i, self.down)
+                i += 1
 
     def do_deathrattle(self):
         if not self.attack_flag:
@@ -1085,13 +1248,13 @@ class battlefeild:
             dead_up=[]
             dead_down=[]
             for i in range(len(self.up)):
-                if self.up[i].get_death():
+                if self.up[i].get_death() and (not self.up[i].get_reborn()):
                     self.up[i].set_rattle(True)
                     dead_up.append(i)
                     if self.up[i].get_character() == "Mech" and len(self.mech_up) < 2:
                         self.mech_up.append([self.up[i].get_name(),self.up[i].get_golden()])
             for i in range(len(self.down)):
-                if self.down[i].get_death():
+                if self.down[i].get_death() and (not self.down[i].get_reborn()):
                     self.down[i].set_rattle(True)
                     dead_down.append(i)
                     if self.down[i].get_character() == "Mech" and len(self.mech_down) < 2:
@@ -1100,74 +1263,102 @@ class battlefeild:
                 times = deathrattle_time(self.up)
                 for i in dead_up:
                     deathrattle_lst = self.up[i+pos_up].get_deathrattle().split("+")
+                    dead_pos = i + pos_up
                     if deathrattle_lst[0]:
                         for j in deathrattle_lst:
                             for k in range(times):
                                 if j == "Kangor's Apprentice" and alive_num(self.up)<7:
                                     for l in self.mech_up:
                                         temp = len(self.up)
-                                        summon(l[0],self.up[i+pos_up].get_move(),i+pos_up+1,self.up,"deathrattle",l[1])
+                                        summon(l[0],self.up[dead_pos].get_move(),i+pos_up+1,self.up,"deathrattle",l[1])
                                         pos_up += len(self.up) - temp
                                 else:
                                     temp=len(self.up)
-                                    single_deathrattle(j,self.up[i+pos_up],self.up,self.down,i+pos_up+1)
+                                    single_deathrattle(j,self.up[dead_pos],self.up,self.down,i+pos_up+1)
                                     pos_up+=len(self.up)-temp
                                     self.renew_buff()
-                    after_death(self.up[i+pos_up].get_character(),self.up,self.down)
+                    after_death(self.up[dead_pos].get_character(),self.up,self.down)
                 times=deathrattle_time(self.down)
                 for i in dead_down:
                     deathrattle_lst = self.down[i+pos_down].get_deathrattle().split("+")
+                    dead_pos = i + pos_down
                     if deathrattle_lst[0]:
                         for j in deathrattle_lst:
                             for k in range(times):
                                 if j == "Kangor's Apprentice" and alive_num(self.down)<7:
                                     for l in self.mech_down:
                                         temp = len(self.down)
-                                        summon(l[0],self.down[i+pos_down].get_move(),i+pos_down+1,self.down,"deathrattle",l[1])
+                                        summon(l[0],self.down[dead_pos].get_move(),i+pos_down+1,self.down,"deathrattle",l[1])
                                         pos_down += len(self.down) - temp
                                 else:
                                     temp = len(self.down)
-                                    single_deathrattle(j, self.down[i+pos_down], self.down, self.up,i+pos_down+1)
+                                    single_deathrattle(j, self.down[dead_pos], self.down, self.up,i+pos_down+1)
                                     pos_down += len(self.down) - temp
                                     self.renew_buff()
-                    after_death(self.down[i+pos_down].get_character(), self.down, self.up)
+                    after_death(self.down[dead_pos].get_character(), self.down, self.up)
             else:
                 times = deathrattle_time(self.down)
                 for i in dead_down:
                     deathrattle_lst = self.down[i + pos_down].get_deathrattle().split("+")
+                    dead_pos = i + pos_down
                     if deathrattle_lst[0]:
                         for j in deathrattle_lst:
                             for k in range(times):
                                 if j == "Kangor's Apprentice" and alive_num(self.down) < 7:
                                     for l in self.mech_down:
                                         temp = len(self.down)
-                                        summon(l[0], self.down[i + pos_down].get_move(), i + pos_down+1, self.down,
+                                        summon(l[0], self.down[dead_pos].get_move(), i + pos_down + 1, self.down,
                                                "deathrattle", l[1])
                                         pos_down += len(self.down) - temp
                                 else:
                                     temp = len(self.down)
-                                    single_deathrattle(j, self.down[i + pos_down], self.down, self.up, i + pos_down+1)
+                                    single_deathrattle(j, self.down[dead_pos], self.down, self.up, i + pos_down + 1)
                                     pos_down += len(self.down) - temp
                                     self.renew_buff()
-                    after_death(self.down[i + pos_down].get_character(), self.down, self.up)
+                    after_death(self.down[dead_pos].get_character(), self.down, self.up)
                 times = deathrattle_time(self.up)
                 for i in dead_up:
                     deathrattle_lst = self.up[i + pos_up].get_deathrattle().split("+")
+                    dead_pos = i + pos_up
                     if deathrattle_lst[0]:
                         for j in deathrattle_lst:
                             for k in range(times):
                                 if j == "Kangor's Apprentice" and alive_num(self.up) < 7:
                                     for l in self.mech_up:
                                         temp = len(self.up)
-                                        summon(l[0], self.up[i + pos_up].get_move(), i + pos_up+1, self.up, "deathrattle",
-                                               l[1])
+                                        summon(l[0], self.up[dead_pos].get_move(), i + pos_up + 1, self.up,
+                                               "deathrattle", l[1])
                                         pos_up += len(self.up) - temp
                                 else:
                                     temp = len(self.up)
-                                    single_deathrattle(j, self.up[i + pos_up], self.up, self.down, i + pos_up+1)
+                                    single_deathrattle(j, self.up[dead_pos], self.up, self.down, i + pos_up + 1)
                                     pos_up += len(self.up) - temp
                                     self.renew_buff()
-                    after_death(self.up[i + pos_up].get_character(), self.up, self.down)
+                    after_death(self.up[dead_pos].get_character(), self.up, self.down)
+
+
+    def do_reborn(self):
+        if not self.attack_flag:
+            i=0
+            while i<len(self.up):
+                if self.up[i].get_death() and self.up[i].get_reborn()==2:
+                    if alive_num(self.up)<7:
+                        single_reborn(i,self.up)
+                        i+=1
+                    else:
+                        del self.up[i]
+                else:
+                    i+=1
+            i=0
+            while i < len(self.down):
+                if self.down[i].get_death() and self.down[i].get_reborn()==2:
+                    if alive_num(self.down)<7:
+                        single_reborn(i,self.down)
+                        i+=1
+                    else:
+                        del self.down[i]
+                else:
+                    i+=1
 
     def detect_death(self):
         Flag=True
@@ -1415,12 +1606,16 @@ class battlefeild:
 def battle(field):
     field.battle_begin()
     field.dump()
+    field.do_heropowers()
+    #field.dump()
     field.check_state()
    # print (field,"\n")
     while not field.get_result():
         field.minion_battle()
         field.renew_buff()
+        field.reborn_preset()
         field.do_deathrattle()
+        field.do_reborn()
        # field.renew_buff()
         field.dump()
        # print (field,"\n")
@@ -1450,11 +1645,16 @@ def simulate(field1,time):
             field.detect_death()
             field.renew_buff()
             field.renew_attack()
+
         if field.get_result()=="up win":
             up+=1
+            if not field.calc_tier():
+                print (field,"up\n")
             up1+=field.calc_tier()
         elif field.get_result()=="down win":
             down+=1
+            if not field.calc_tier():
+                print (field,"down\n")
             down1+=field.calc_tier()
         elif field.get_result()=="a tie":
             tie+=1
@@ -1467,27 +1667,26 @@ def simulate(field1,time):
     print ("a tie: ",tie)
 
 
+
 '''
 ba = battlefeild()
-ba.quick_add_up("Kaboom Bot",15, golden=True)
-ba.quick_add_up("Cobalt Guardian", 25, 10,shield=True,deathrattle="Replicating Menace",times=1)
-ba.quick_add_up("Security Rover", 7, 10,shield=True,taunt=True)
-ba.quick_add_up("Shielded Minibot", 9)
-ba.quick_add_up("Screwjank Clunker", 3)
-ba.quick_add_up("Metaltooth Leaper", 13,golden=True)
-ba.quick_add_up("Baron Rivendare")
-ba.quick_add_down("Cobalt Guardian", 8, shield=True)
-ba.quick_add_down("Harvest Golem", 6, golden=True)
-ba.quick_add_down("Mechano-Egg")
-ba.quick_add_down("Shielded Minibot", 4)
-ba.quick_add_down("Screwjank Clunker")
-ba.quick_add_down("Bolvar, Fireblood")
-ba.quick_add_down("Junkbot")
-print (ba)
+ba.quick_add_up("King Bagurgle", 14, 12, shield=True, poison=True, deathrattle="Gentle Megasaur",times=3)
+ba.quick_add_up("Old Murk-Eye", 38, 29, shield=True, poison=True, deathrattle="Gentle Megasaur",times=3,golden=True)
+ba.quick_add_up('Soul Juggler')
+ba.quick_add_up("Murloc Tidecaller", 34, 28, shield=True, poison=True, deathrattle="Gentle Megasaur",times=3,golden=True)
+ba.quick_add_up("Murloc Warleader", 19, 28, shield=True, poison=True, deathrattle="Gentle Megasaur",times=3,golden=True)
+ba.quick_add_up("King Bagurgle", 18, 16, shield=True, poison=True, deathrattle="Gentle Megasaur",times=3)
+ba.quick_add_up("Voidlord")
+ba.quick_add_down("King Bagurgle", 14, 12,  poison=True, deathrattle="Gentle Megasaur",golden=True)
+ba.quick_add_down("Foe Reaper 4000", 14, 14,True,True)
+ba.quick_add_down("Murloc Tidehunter", 18, 25, shield=True, poison=True, deathrattle="Gentle Megasaur",golden=True)
+ba.quick_add_down("Murloc Scout", 12,22,True,True,True, deathrattle="Gentle Megasaur",golden=True)
+ba.quick_add_down("Murloc Scout", 10,20,True,True,True, deathrattle="Gentle Megasaur")
+ba.quick_add_down("Rockpool Hunter", 12,24,shield=True,poison=True, deathrattle="Gentle Megasaur",golden=True)
+ba.quick_add_down("Voidlord")
 import time
 start_time = time.time()
 simulate(ba,1000)
 end_time = time.time()
 print (end_time-start_time)
 #'''
-
