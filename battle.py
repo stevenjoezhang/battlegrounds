@@ -994,7 +994,7 @@ class battlefeild:
         self.begin=None #True 表示上面先动,主玩家设置
         self.now =None  #表示运行到第几个,第一表示该第几个，第二表示示该上方或下方,True 表示上方
         self.history = []
-        self.atkHistory = []
+        self.atkHistory = [[]]
         self.log = ""
         self.attack_time=1
         self.already_attack=0
@@ -1044,7 +1044,8 @@ class battlefeild:
                     "death": minion.get_rattle(),
                     "name": minion.get_name(),
                     "source": minion.get_source(),
-                    "reborn": minion.get_reborn()
+                    "reborn": minion.get_reborn(),
+                    "deathrattle":minion.get_deathrattle()
                 })
         self.history.append(current)
     def set_log(self,lo):
@@ -1154,22 +1155,23 @@ class battlefeild:
                     i.set_buff([Murloc_num-1, 0])
 
     def do_heropowers(self):
-        side=False
-        if len(self.up)==len(self.down):
-            side=self.now[1]
-        else:
-            side=self.begin
-        if side:
-            if self.heropower[0]:
-                single_heropower(self.heropower[0],self.up,self.down)
-            if self.heropower[1]:
-                single_heropower(self.heropower[1],self.down,self.up)
-        else:
-            if self.heropower[1]:
-                single_heropower(self.heropower[1], self.down, self.up)
-            if self.heropower[0]:
-                single_heropower(self.heropower[0], self.up, self.down)
-        self.detect_death()
+        if self.heropower:
+            side=False
+            if len(self.up)==len(self.down):
+                side=self.now[1]
+            else:
+                side=self.begin
+            if side:
+                if self.heropower[0]:
+                    single_heropower(self.heropower[0],self.up,self.down)
+                if self.heropower[1]:
+                    single_heropower(self.heropower[1],self.down,self.up)
+            else:
+                if self.heropower[1]:
+                    single_heropower(self.heropower[1], self.down, self.up)
+                if self.heropower[0]:
+                    single_heropower(self.heropower[0], self.up, self.down)
+            self.detect_death()
 
     def minion_battle(self):
         side = self.now[1]
@@ -1608,7 +1610,7 @@ def battle(field):
     field.battle_begin()
     field.dump()
     field.do_heropowers()
-    #field.dump()
+    field.dump()
     field.check_state()
    # print (field,"\n")
     while not field.get_result():

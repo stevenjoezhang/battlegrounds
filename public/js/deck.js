@@ -109,6 +109,9 @@ function Minion(prop, board, position) {
 			return this.splat("-0");
 		}
 	}
+	this.setReborn = function(state) {
+		state ? this.ele.classList.add("reborn") : this.ele.classList.add("remove");
+	}
 	this.setHealth = function(health) {
 		let deltaHealth = health - this.prop.health;
 		this.prop.health = health;
@@ -141,6 +144,15 @@ function Minion(prop, board, position) {
 		if (deltaAttack !== 0) {
 			this.animationTimer(this.ele.querySelector(".attack"), "text-splat");
 		}
+	}
+	this.refresh = function(target) {
+		return new Promise(resolve => {
+			this.setShield(target.shield);
+			this.setReborn(target.reborn);
+			this.setAttack(target.attack);
+			this.setHealth(target.health);
+			resolve();
+		});
 	}
 	this.doAttack = function(targetId) {
 		if (this.dead) return;
@@ -220,7 +232,7 @@ function Minion(prop, board, position) {
 		let attacking = battle[1][i];
 		let result = battle[0][i + 1];
 		let queue = {
-			health: [],
+			refresh: [],
 			die: [],
 			summon: [[], [], []]
 		};
@@ -234,15 +246,13 @@ function Minion(prop, board, position) {
 					else queue.summon[1].push(() => minion.summon());
 					return;
 				}
-				queue.health.push(() => minion.setShield(target.shield));
-				queue.health.push(() => minion.setAttack(target.attack));
-				queue.health.push(() => minion.setHealth(target.health));
+				queue.refresh.push(() => minion.refresh(target));
 				if (target.death) queue.die.push(() => minion.die());
 			});
 		});
 		if (attacking.length === 2) await minions[attacking[0]].doAttack(attacking[1]);
 		await Promise.all(queue.die.map(ele => ele()));
-		await Promise.all(queue.health.map(ele => ele()));
+		await Promise.all(queue.refresh.map(ele => ele()));
 		for (let i = 0; i < 3; i++) {
 			await Promise.all(queue.summon[i].map(ele => ele()));
 		}
