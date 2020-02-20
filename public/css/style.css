@@ -12,11 +12,12 @@
 	cursor: url(/img/EyeHalf.png), auto;
 	margin: 0;
 	background-color: #fff;
+	perspective: 80vw;
 }
-.deck-entry:hover {
+.minion:hover {
 	cursor: url(/img/EyeOpen.png), auto;
 }
-.container:active {
+.container:active, .minion:active {
 	cursor: url(/img/EyeClosed.png), auto;
 }
 .section-decklist {
@@ -35,15 +36,12 @@
 	left: 9%;
 	display: flex;
 	justify-content: center;
-	perspective: 80vw;
 }
 .up {
 	top: 31.5%;
-	perspective-origin: top;
 }
 .down {
 	bottom: 35%;
-	perspective-origin: bottom;
 }
 .minion {
 	width: 14.2%;
@@ -264,15 +262,15 @@
 }
 @keyframes die {
 	0% {
-		transform: translateX(-50%) translateY(10%) scale(0.3);
+		transform: translate(-50%, 10%) scale(0.3);
 		opacity: 0.2;
 	}
 	80% {
-		transform: translateX(-50%) translateY(-20%) scale(1);
+		transform: translate(-50%, -20%) scale(1);
 		opacity: 1;
 	}
 	100% {
-		transform: translateX(-50%) translateY(-20%) scale(1);
+		transform: translate(-50%, -20%) scale(1);
 		opacity: 0;
 	}
 }
@@ -287,15 +285,16 @@
 	overflow: scroll;
 	z-index: 200;
 	font-family: monospace;
+	display: none;
 }
 .preview {
 	z-index: 300;
 	display: none;
-	position: absolute;
-	transform: translateX(-90%) translateY(-30%);
+	position: fixed;
+	transform: translateY(-30%);
 	pointer-events: none;
 }
-.minion:hover .preview {
+.minion:not(.dying):hover .preview {
 	display: block;
 }
 #menu-icon {

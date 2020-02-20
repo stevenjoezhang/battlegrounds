@@ -69,6 +69,12 @@ function Minion(prop, board, position) {
 				<img loading="lazy" src="https://art.hearthstonejson.com/v1/render/latest/${"zhCN"}/256x/${this.id}.png">
 			</div>`);
 	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.id}.jpg)`;
+	this.ele.addEventListener("mousemove", () => {
+		let preview = this.ele.querySelector(".preview");
+		preview.style.setProperty("transform", `translate(${this.getPosition(true) >= 5 ? "-90%" : "50%"}, -30%)`);
+		preview.style.left = this.ele.getBoundingClientRect().left + "px";
+		preview.style.top = this.ele.getBoundingClientRect().top + "px";
+	});
 	if ((typeof position === "number") && (position < this.parent.querySelectorAll(".minion:not(.dying)").length)) {
 		this.parent.querySelectorAll(".minion:not(.dying)")[position].insertAdjacentElement("beforebegin", this.ele);
 	}
@@ -133,9 +139,11 @@ function Minion(prop, board, position) {
 			setTimeout(resolve, 1000);
 		});
 	}
-	this.getPosition = function() {
+	this.getPosition = function(absolute) {
 		let allMinions = this.parent.querySelectorAll(".minion:not(.before-summon)");
-		return [...allMinions].indexOf(this.ele) - allMinions.length / 2;
+		let position = [...allMinions].indexOf(this.ele);
+		if (!absolute) position -= allMinions.length / 2;
+		return position;
 	}
 	this.setAttack = function(attack) {
 		let deltaAttack = attack - this.prop.attack;
@@ -159,24 +167,25 @@ function Minion(prop, board, position) {
 		let target = minions[targetId];
 		let deltaX = (target.getPosition() - this.getPosition()) * 100;
 		let deltaY = this.belongsTo === 0 ? 100 : -100;
-		this.parent.style.cssText = "z-index: 100;";
-		document.querySelectorAll(".minions")[1 - this.belongsTo].style.cssText = "z-index: 0;";
+		let rotate = this.belongsTo === 0 ? "30deg" : "-30deg";
+		this.parent.style.setProperty("z-index", 100);
+		document.querySelectorAll(".minions")[1 - this.belongsTo].style.setProperty("z-index", "auto");
 		let rid = makeid(8);
 		document.getElementById("attack-style").innerHTML += `@keyframes attacking-${rid} {
 				0% {
 					transform: translate3d(0, 0, 0);
 				}
 				40% {
-					transform: translate3d(0, 0, 2vw);
+					transform: translate3d(0, 0, 4vw);
 				}
 				60% {
 					transform: translate3d(${deltaX}%, ${deltaY}%, 0);
 				}
 				61% {
-					transform: translate3d(${deltaX}%, ${deltaY}%, 0) rotateX(-30deg);
+					transform: translate3d(${deltaX}%, ${deltaY}%, 0) rotateX(${rotate});
 				}
 				80% {
-					transform: translate3d(0, 0, 0) rotateX(-30deg);
+					transform: translate3d(0, 0, 0) rotateX(${rotate});
 				}
 				100% {
 					transform: translate3d(0, 0, 0);
@@ -227,8 +236,7 @@ function Minion(prop, board, position) {
 (async () => {
 	await initBoard();
 	document.getElementById("console").innerText = battle[2];
-	for (let i in battle[1]) {
-		i = Number(i);
+	for (let i = 0; i < battle[1].length; i++) {
 		let attacking = battle[1][i];
 		let result = battle[0][i + 1];
 		let queue = {
