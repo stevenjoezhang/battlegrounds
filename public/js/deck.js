@@ -110,8 +110,10 @@ function Minion(prop, board, position) {
 		this.prop.shield = state;
 		if (state) this.ele.classList.add("shield");
 		else {
-			this.ele.classList.remove("shield");
-			this.animationTimer(this.ele, "lose-shield");
+			setTimeout(() => {
+				this.ele.classList.remove("shield");
+				this.animationTimer(this.ele, "lose-shield");
+			}, 500);
 			return this.splat("-0");
 		}
 	}

@@ -94,12 +94,12 @@
 .minion.poisonous .poisonous {
 	background-image: url(/img/poisonous.png);
 }
-.minion.shield .shield, .minion.lose-shield .shield {
+.minion.shield .shield {
 	background-image: url(/img/divine-shield.png);
 }
 .minion.lose-shield .shield {
 	animation: lose-shield 1s forwards;
-	animation-delay: .5s;
+	background-image: url(/img/divine-shield-pop.png);
 }
 .minion.reborn .reborn {
 	background-image: url(/img/reborn.png);
