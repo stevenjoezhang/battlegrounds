@@ -71,7 +71,7 @@ function Minion(prop, board, position) {
 	this.ele.querySelector(".art").style.backgroundImage = `url(https://art.hearthstonejson.com/v1/256x/${this.id}.jpg)`;
 	this.ele.addEventListener("mousemove", () => {
 		let preview = this.ele.querySelector(".preview");
-		preview.style.setProperty("transform", `translate(${this.getPosition(true) >= 5 ? "-90%" : "50%"}, -30%)`);
+		preview.style.transform = `translate(${this.getPosition(true) >= 5 ? "-90%" : "50%"}, -30%)`;
 		preview.style.left = this.ele.getBoundingClientRect().left + "px";
 		preview.style.top = this.ele.getBoundingClientRect().top + "px";
 	});
@@ -172,23 +172,17 @@ function Minion(prop, board, position) {
 		document.querySelectorAll(".minions")[1 - this.belongsTo].style.setProperty("z-index", "auto");
 		let rid = makeid(8);
 		document.getElementById("attack-style").innerHTML += `@keyframes attacking-${rid} {
-				0% {
-					transform: translate3d(0, 0, 0);
-				}
 				40% {
-					transform: translate3d(0, 0, 4vw);
+					transform: translateZ(4vw);
 				}
 				60% {
-					transform: translate3d(${deltaX}%, ${deltaY}%, 0);
+					transform: translate(${deltaX}%, ${deltaY}%);
 				}
 				61% {
-					transform: translate3d(${deltaX}%, ${deltaY}%, 0) rotateX(${rotate});
+					transform: translate(${deltaX}%, ${deltaY}%) rotateX(${rotate});
 				}
 				80% {
-					transform: translate3d(0, 0, 0) rotateX(${rotate});
-				}
-				100% {
-					transform: translate3d(0, 0, 0);
+					transform: rotateX(${rotate});
 				}
 			}
 			.attacking-${rid} {

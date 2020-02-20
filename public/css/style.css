@@ -208,21 +208,17 @@
 	animation: shake-down .2s;
 }
 @keyframes shake-down {
-	0% {}
 	50% {
 		transform: translateY(10px);
 	}
-	100% {}
 }
 .section-decklist.shake-up {
 	animation: shake-up .2s;
 }
 @keyframes shake-up {
-	0% {}
 	50% {
 		transform: translateY(-10px);
 	}
-	100% {}
 }
 .text {
 	color: white;
@@ -266,7 +262,7 @@
 		opacity: 0.2;
 	}
 	80% {
-		transform: translate(-50%, -20%) scale(1);
+		transform: translate(-50%, -18%) scale(1);
 		opacity: 1;
 	}
 	100% {
