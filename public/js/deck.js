@@ -118,7 +118,7 @@ function Minion(prop, board, position) {
 		}
 	}
 	this.setReborn = function(state) {
-		state ? this.ele.classList.add("reborn") : this.ele.classList.add("remove");
+		state ? this.ele.classList.add("reborn") : this.ele.classList.remove("reborn");
 	}
 	this.setHealth = function(health) {
 		let deltaHealth = health - this.prop.health;
