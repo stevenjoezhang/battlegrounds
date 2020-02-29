@@ -156,13 +156,12 @@ function Minion(prop, board, position) {
 		}
 	}
 	this.refresh = function(target) {
-		return new Promise(resolve => {
-			this.setShield(target.shield);
-			this.setReborn(target.reborn);
-			this.setAttack(target.attack);
-			this.setHealth(target.health);
-			resolve();
-		});
+		return Promise.all([
+			this.setShield(target.shield),
+			this.setReborn(target.reborn),
+			this.setAttack(target.attack),
+			this.setHealth(target.health)
+		]);
 	}
 	this.doAttack = function(targetId) {
 		if (this.dead) return;
