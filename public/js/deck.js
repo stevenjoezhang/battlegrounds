@@ -41,10 +41,9 @@ function makeid(length) {
 }
 
 function Minion(prop, board, position) {
-	let index = database.findIndex(item => prop.name.toLowerCase() === item.name.toLowerCase());
 	//this.dbIndex = database.findIndex(item => [item.id, item.goldenId].includes(this.id));
-	this.data = database[index];
-	this.id = (index !== -1) ? ((prop.golden && database[index].goldenId) ? database[index].goldenId : database[index].id) : "TB_BaconUps_038";
+	this.data = database.find(item => prop.name.toLowerCase() === item.name.toLowerCase());
+	this.id = this.data ? ((prop.golden && this.data.goldenId) ? this.data.goldenId : this.data.id) : "TB_BaconUps_038";
 	this.gid = prop.id;
 	this.prop = prop;
 	this.ele = document.createElement("div");
