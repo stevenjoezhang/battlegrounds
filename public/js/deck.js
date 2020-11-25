@@ -7,7 +7,7 @@ function setSize() {
 }
 setSize();
 window.addEventListener("resize", setSize);
-var minions = [];
+const minions = [];
 
 function toggleMenu() {
 	let target = document.getElementById("menu");
@@ -31,10 +31,10 @@ async function initBoard() {
 }
 
 function makeid(length) {
-	var result = '';
-	var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	var charactersLength = characters.length;
-	for (var i = 0; i < length; i++) {
+	let result = '';
+	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	const charactersLength = characters.length;
+	for (let i = 0; i < length; i++) {
 		result += characters.charAt(Math.floor(Math.random() * charactersLength));
 	}
 	return result;
@@ -129,7 +129,7 @@ function Minion(prop, board, position) {
 		}
 	}
 	this.splat = function(value) {
-		var animEle = document.createElement("div");
+		const animEle = document.createElement("div");
 		animEle.classList.add("image", "blood-splat");
 		animEle.innerHTML = `<div class="text blood-splat">${value}</div>`;
 		this.ele.appendChild(animEle);
@@ -199,7 +199,7 @@ function Minion(prop, board, position) {
 		});
 	}
 	this.createOverlayAnim = function(className) {
-		var animEle = document.createElement("div");
+		const animEle = document.createElement("div");
 		animEle.classList.add("overlay", className);
 		animEle.style.left = this.ele.getBoundingClientRect().left + this.ele.offsetWidth / 2 + "px";
 		animEle.style.bottom = window.innerHeight - this.ele.getBoundingClientRect().bottom + "px";
@@ -211,7 +211,7 @@ function Minion(prop, board, position) {
 		if (this.dead) return;
 		this.dead = true;
 		if (this.data.deathrattle) {
-			var animEle = this.createOverlayAnim("deathrattle-die");
+			const animEle = this.createOverlayAnim("deathrattle-die");
 			document.body.appendChild(animEle);
 			setTimeout(() => {
 				document.body.removeChild(animEle);
