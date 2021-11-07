@@ -56,19 +56,37 @@ Happy hacking,
 
 Nicholas and Damien.
 */
-function entry() {
-	const fs = require("fs");
-	const upyhex = require("./lib/hexlify");
-	const firmware = require("./lib/firmware");
 
-	var fileName = process.argv[2];
+const fs = require('fs');
+const microbitFs = require('./PythonEditor/static/js/microbit-fs.umd');
+
+function entry() {
+	const fileName = process.argv[2];
 	if (!fileName) {
-		console.log("Usage: p2h <filename>");
-		process.exit();
+		console.log('Usage: p2h <filename>');
+		return;
 	}
-	var file = fs.readFileSync(fileName);
-	var input = file.toString();
-	var output = upyhex.injectPyStrIntoIntelHex(firmware, input);
-	fs.writeFileSync("microbit.hex", output);
+	try {
+		const file = fs.readFileSync(fileName);
+		const mainCode = file.toString();
+
+		const uPyV1 = fs.readFileSync('./PythonEditor/micropython/microbit-micropython-v1.hex');
+		const uPyV2 = fs.readFileSync('./PythonEditor/micropython/microbit-micropython-v2.hex');
+		const commonFsSize = 20 * 1024;
+
+		const uPyFs = new microbitFs.MicropythonFsHex([
+			{ hex: uPyV1, boardId: 0x9901 },
+			{ hex: uPyV2, boardId: 0x9903 },
+		], {
+			'maxFsSize': commonFsSize,
+		});
+		uPyFs.create('main.py', mainCode);
+		const output = uPyFs.getUniversalHex();
+		fs.writeFileSync('microbit.hex', output);
+
+	} catch (e) {
+		console.error(e.message);
+	}
 }
+
 module.exports = entry;
